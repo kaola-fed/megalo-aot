@@ -1,0 +1,16 @@
+{
+  "name": "megalo-aot",
+  "private": true,
+  "scripts": {
+    "boot": "lerna bootstrap",
+    "clean": "lerna clean"
+  },
+  "devDependencies": {
+    "lerna": "^3.0.0-rc.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "license": "MIT"
+}
