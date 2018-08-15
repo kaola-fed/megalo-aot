@@ -59,20 +59,23 @@ function lazyEmit( compiler, megaloTemplateCompiler ) {
       const entrypoints = compilation.entrypoints
       const chunkFiles = sortEntrypointFiles( entrypoints )
 
+      const pagesWithFiles = []
+      Object.keys( pages ).map( k => {
+        const page = pages[ k ] || {}
+        const files = chunkFiles[ k ]
+        pagesWithFiles.push( Object.assign( {}, page, { files } ) )
+      } )
+
       switch( platform ) {
         case 'wechat':
-          const handler = require( '../platforms/wechat' )
+          const { codegen } = require( '../platforms/wechat' )
 
-          // emit pages (wxml/wxss/js/json)
-          // emit components
-          const pagesWithFiles = []
-          Object.keys( pages ).map( k => {
-            const page = pages[ k ] || {}
-            const files = chunkFiles[ k ]
-            pagesWithFiles.push( Object.assign( {}, page, { files } ) )
-          } )
-
-          handler(
+          // emit files, includes:
+          // 1. pages (wxml/wxss/js/json)
+          // 2. components
+          // 3. slots
+          // 4. htmlparse
+          codegen(
             pagesWithFiles,
             { templates, allCompilerOptions, megaloTemplateCompiler },
             {

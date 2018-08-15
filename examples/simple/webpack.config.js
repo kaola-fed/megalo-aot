@@ -12,7 +12,7 @@ module.exports = {
 
   target: createMegaloTarget( {
     compiler: Object.assign( compiler, {
-      compileToTemplate( content, { target, name, moduleId, components = [] } = {} ) {
+      compileToTemplate( content, { target, name, scopeId, imports = [] } = {} ) {
         return {
           body: 'main',
           slots: [
