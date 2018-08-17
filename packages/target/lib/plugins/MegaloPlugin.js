@@ -23,6 +23,9 @@ class MegaloPlugin {
     const megaloTemplateCompiler = megaloOptions.compiler ||
       require( '@megalo/template-compiler' )
 
+    // replace globalObject
+    replaceGlobalObject( compiler )
+
     // attach to loaderContext
     attachEntryHelper( compiler )
     attachCacheAPI( compiler )
@@ -48,6 +51,10 @@ class MegaloPlugin {
 
     compiler.options.module.rules = rules
   }
+}
+
+function replaceGlobalObject( compiler ) {
+  compiler.options.output.globalObject = 'global'
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler ) {
@@ -131,13 +138,6 @@ function replaceVueTemplateCompiler( { rules, compiler } ) {
 
   // override compiler for `vue-loader` and `./loaders/vue`
   vueUseLoader.options.compiler = compiler
-
-  // const megaloVueLoader = {
-  //   options: vueUseLoader.options || {},
-  //   loader: require.resolve( '../loaders/vue' )
-  // }
-  //
-  // vueUse.splice( vueUseLoaderIndex + 1, 0, megaloVueLoader )
 }
 
 // vue-loader clones babel-loader rule, we shall ignore it
