@@ -1,6 +1,6 @@
 {
   "name": "@megalo/target",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",
   "publishConfig": {
@@ -11,6 +11,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@megalo/template-compiler": "^0.0.1",
     "@vue/component-compiler-utils": "^2.1.2",
     "babel-core": "^6.26.3",
     "babel-generator": "^6.26.1",
@@ -21,10 +22,8 @@
     "postcss-selector-parser": "^5.0.0-rc.3",
     "querystring": "^0.2.0",
     "tapable": "^1.0.0",
-    "webpack-sources": "^1.1.0",
-    "@megalo/template-compiler": "^0.0.1"
+    "webpack-sources": "^1.1.0"
   },
-  "devDependencies": {},
   "peerDependencies": {
     "webpack": "^4.16.5"
   }
