@@ -6,6 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [ "lib" ],
   "scripts": {},
   "keywords": [],
   "author": "",
