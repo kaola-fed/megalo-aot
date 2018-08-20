@@ -1,6 +1,6 @@
 {
   "name": "@megalo/target",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "lib/index.js",
   "publishConfig": {
@@ -28,7 +28,7 @@
     "webpack-sources": "^1.1.0"
   },
   "peerDependencies": {
-    "webpack": "^4.16.5",
-    "vue-loader": "15.4.0"
+    "vue-loader": "15.4.0",
+    "webpack": "^4.16.5"
   }
 }
