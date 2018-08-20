@@ -6,7 +6,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [ "lib" ],
+  "files": [
+    "lib"
+  ],
   "scripts": {},
   "keywords": [],
   "author": "",
@@ -26,6 +28,7 @@
     "webpack-sources": "^1.1.0"
   },
   "peerDependencies": {
-    "webpack": "^4.16.5"
+    "webpack": "^4.16.5",
+    "vue-loader": "15.4.0"
   }
 }

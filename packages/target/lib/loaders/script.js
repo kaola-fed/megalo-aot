@@ -3,6 +3,7 @@ const babel = require( 'babel-core' )
 const extractComponentsPlugin = require( '../babel-plugins/extract-components' )
 const resolveSource = require( '../utils/resolveSource' )
 const hashify = require( '../utils/hashify' )
+const removeExtension = require( '../utils/removeExtension' )
 
 module.exports = function ( source ) {
   const loaderContext = this
@@ -32,13 +33,14 @@ module.exports = function ( source ) {
         } )
     } )
   ).then( () => {
+    const realResourcePath = removeExtension( loaderContext.resourcePath, '.js' )
     const compilerOptions = {
-      name: hashify( loaderContext.resourcePath ),
+      name: hashify( realResourcePath ),
       imports: tmp,
     }
 
     loaderContext.megaloCacheToAllCompilerOptions(
-      loaderContext.resourcePath,
+      realResourcePath,
       compilerOptions
     )
 

@@ -1,6 +1,7 @@
 const qs = require('querystring')
 const loaderUtils = require('loader-utils')
 const { compileTemplate } = require('@vue/component-compiler-utils')
+const removeExtension = require( '../utils/removeExtension' )
 
 // Loader that compiles raw template into JavaScript functions.
 // This is injected by the global pitcher (../pitch) for template
@@ -24,12 +25,14 @@ module.exports = function (source) {
     comments: query.comments
   })
 
+  const realResourcePath = removeExtension( loaderContext.resourcePath )
+
   loaderContext.megaloCacheToAllCompilerOptions(
-    loaderContext.resourcePath,
+    realResourcePath,
     compilerOptions
   )
   loaderContext.megaloCacheToTemplates(
-    loaderContext.resourcePath,
+    realResourcePath,
     source
   )
 
