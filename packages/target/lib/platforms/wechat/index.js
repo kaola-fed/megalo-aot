@@ -10,9 +10,10 @@ const relativeToRoot = require( './utils/relativeToRoot' )
 
 function codegen (
   pages = [],
-  { templates, allCompilerOptions, megaloTemplateCompiler } = {},
+  { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions } = {},
   { compiler, compilation } = {}
 ) {
+  const { vhtml = false } = megaloOptions
   const generators = [
     [ json, '.json' ],
     [ script, '.js' ],
@@ -22,11 +23,12 @@ function codegen (
 
   pages.forEach( options => {
     const { file } = options
+    const generatorOptions = Object.assign({ vhtml }, options)
 
     generators.forEach( pair => {
       const generate = pair[ 0 ]
       const extension = pair[ 1 ]
-      emitFile( `${ file }${ extension }`, generate( options ), compilation )
+      emitFile( `${ file }${ extension }`, generate( generatorOptions ), compilation )
     } )
   } )
 
@@ -47,10 +49,12 @@ function codegen (
         constants.SLOTS_OUTPUT_PATH
     }
     // add htmlparse
-    imports[ '_htmlparse_' ] = {
-      name: '',
-      src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
-        constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
+    if (vhtml) {
+      imports[ '_htmlparse_' ] = {
+        name: '',
+        src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
+          constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
+      }
     }
 
     let compilerOptions = Object.assign(

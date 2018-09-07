@@ -1,8 +1,8 @@
 const relativeToRoot = require( '../utils/relativeToRoot' )
 const constants = require( '../constants' )
 
-module.exports = function ( { file, files = {} } = {} ) {
-  const htmlparse = [ constants.HTMLPARSE_OUTPUT_PATH.STYLE ]
+module.exports = function ( { file, files = {}, vhtml = false } = {} ) {
+  const htmlparse = vhtml ? [ constants.HTMLPARSE_OUTPUT_PATH.STYLE ] : []
   const split = files.split.style || []
   const main = files.main.style || []
 
