@@ -1,6 +1,7 @@
 module.exports = function ( { types: t } ) {
   return {
     visitor: {
+
       ExportDefaultDeclaration( path ) {
         const declaration = path.node.declaration
 
@@ -8,6 +9,12 @@ module.exports = function ( { types: t } ) {
           handleObjectExpression( declaration, path )
         }
       },
+      CallExpression( path ) {
+        // parse components in typescript decorator
+        if (isTypescriptDecorator(path)) {
+          handleTypescriptDecorator(path)
+        }
+      }
     },
   }
 
@@ -55,5 +62,23 @@ module.exports = function ( { types: t } ) {
     if ( t.isImportDeclaration( binding.path.parent ) ) {
       return binding.path.parent.source.value
     }
+  }
+
+  function isTypescriptDecorator( path ) {
+    const { callee } = path.node
+    return callee.name === '__decorate'
+  }
+
+  function handleTypescriptDecorator( path ) {
+    const decorators = path.node.arguments[0].elements
+    const componentDecorator = findComponentDecorator(decorators)
+    const componentDeclaration = componentDecorator.arguments[0]
+    if (t.isObjectExpression( componentDeclaration )) {
+      handleObjectExpression( componentDeclaration, path.scope.parent.path )
+    }
+  }
+
+  function findComponentDecorator( decorators ) {
+    return decorators.find(node => t.isCallExpression(node) && node.callee.name === 'Component')
   }
 }
