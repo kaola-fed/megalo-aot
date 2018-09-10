@@ -13,5 +13,7 @@
     "packages/*",
     "examples/*"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+  }
 }

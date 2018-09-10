@@ -21,9 +21,11 @@
     "babelon": "^1.0.5",
     "hash-sum": "^1.0.2",
     "loader-utils": "^1.1.0",
+    "octoparse": "^0.1.0",
     "postcss": "^7.0.2",
     "postcss-selector-parser": "^5.0.0-rc.3",
     "querystring": "^0.2.0",
+    "resolve": "^1.8.1",
     "tapable": "^1.0.0",
     "webpack-sources": "^1.1.0"
   },

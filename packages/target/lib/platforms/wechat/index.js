@@ -7,6 +7,8 @@ const slots = require( './codegen/slots' )
 const emitFile = require( '../../utils/emitFile' )
 const constants = require( './constants' )
 const relativeToRoot = require( './utils/relativeToRoot' )
+const resolve = require('resolve')
+const fs = require('fs')
 
 function codegen (
   pages = [],
@@ -68,6 +70,31 @@ function codegen (
     const name = compilerOptions.name
 
     // emit component
+    emitFile(
+      constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
+      body,
+      compilation
+    )
+
+    const resolveOptions = {
+      basedir: process.cwd(),
+      extensions: [ '.wxml', '.wxss' ]
+    }
+    const wxmlPath = resolve.sync('octoparse/maxParse/maxParse.wxml')
+    const wxssPath = resolve.sync('octoparse/maxParse/maxParse.wxss')
+    const wxml = fs.readFileSync(wxmlPath)
+    const wxss = fs.readFileSync(wxssPath)
+    emitFile(
+      'htmlparse/index.wxml',
+      wxml,
+      compilation
+    )
+    emitFile(
+      'htmlparse/index.wxss',
+      wxss,
+      compilation
+    )
+    // emit v-html component
     emitFile(
       constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
       body,
