@@ -13,7 +13,7 @@ function codegen (
   { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions } = {},
   { compiler, compilation } = {}
 ) {
-  const { vhtml = false } = megaloOptions
+  const { htmlParse = false } = megaloOptions
   const generators = [
     [ json, '.json' ],
     [ script, '.js' ],
@@ -23,7 +23,7 @@ function codegen (
 
   pages.forEach( options => {
     const { file } = options
-    const generatorOptions = Object.assign({ vhtml }, options)
+    const generatorOptions = Object.assign({ htmlParse }, options)
 
     generators.forEach( pair => {
       const generate = pair[ 0 ]
@@ -48,33 +48,33 @@ function codegen (
       src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
         constants.SLOTS_OUTPUT_PATH
     }
-    // add htmlparse
-    if (vhtml) {
-      imports[ '_htmlparse_' ] = {
-        name: '',
-        src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
-          constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
-      }
-    }
 
     let compilerOptions = Object.assign(
       {},
       allCompilerOptions[ resourcePath ],
-      { target: 'wechat', imports },
+      { target: 'wechat', imports, htmlParse }
     )
 
-    const { body, slots } = component( {
+    const { body, slots, needHtmlParser } = component( {
       source,
       compiler: megaloTemplateCompiler,
       compilerOptions,
     } )
 
+    let finalBody = body
     const name = compilerOptions.name
+
+    if (htmlParse && needHtmlParser) {
+      // add htmlparse
+      const htmlPraserSrc = relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
+          constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
+      finalBody = `<import src="${htmlPraserSrc}"/>${body}`
+    }
 
     // emit component
     emitFile(
       constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
-      body,
+      finalBody,
       compilation
     )
 
