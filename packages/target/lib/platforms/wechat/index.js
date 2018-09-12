@@ -55,7 +55,7 @@ function codegen (
       { target: 'wechat', imports, htmlParse }
     )
 
-    const { body, slots, needHtmlParser } = component( {
+    const { body, slots, needHtmlParse } = component( {
       source,
       compiler: megaloTemplateCompiler,
       compilerOptions,
@@ -64,7 +64,7 @@ function codegen (
     let finalBody = body
     const name = compilerOptions.name
 
-    if (htmlParse && needHtmlParser) {
+    if (htmlParse && needHtmlParse) {
       // add htmlparse
       const htmlPraserSrc = relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
           constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
