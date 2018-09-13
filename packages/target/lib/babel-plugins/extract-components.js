@@ -72,9 +72,11 @@ module.exports = function ( { types: t } ) {
   function handleTypescriptDecorator( path ) {
     const decorators = path.node.arguments[0].elements
     const componentDecorator = findComponentDecorator(decorators)
-    const componentDeclaration = componentDecorator.arguments[0]
-    if (t.isObjectExpression( componentDeclaration )) {
-      handleObjectExpression( componentDeclaration, path.scope.parent.path )
+    if ( componentDecorator ) {
+      const componentDeclaration = componentDecorator.arguments[0]
+      if (t.isObjectExpression( componentDeclaration )) {
+        handleObjectExpression( componentDeclaration, path.scope.parent.path )
+      }
     }
   }
 
