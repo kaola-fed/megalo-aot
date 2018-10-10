@@ -1,5 +1,6 @@
-module.exports = function ( entrypoints ) {
+module.exports = function ( entrypoints, platform = 'wechat' ) {
   const results = {}
+  const cssExt = platform === 'alipay' ? 'acss' : 'wxss'
 
   entrypoints.forEach( ( entrypoint, file ) => {
     const chunks = entrypoint.chunks || []
@@ -7,8 +8,8 @@ module.exports = function ( entrypoints ) {
     const splitChunks = chunks.filter( c => isSplitedChunk( c ) )
 
     results[ file ] = {
-      main: mainChunks.reduce( reduceChunk, {} ),
-      split: splitChunks.reduce( reduceChunk, {} ),
+      main: reduceChunk( mainChunks, { cssExt } ),
+      split: reduceChunk( splitChunks, { cssExt } ),
     }
   } )
 
@@ -21,16 +22,18 @@ function mapExtension( extension ) {
   }
 }
 
-function reduceChunk( all, c, i ) {
-  all.js = all.js || []
-  all.jsMap = all.jsMap || []
-  all.style = all.style || []
-  all.styleMap = all.styleMap || []
-  all.js = all.js.concat( c.files.filter( mapExtension( '.js' ) ) )
-  all.jsMap = all.jsMap.concat( c.files.filter( mapExtension( '.js.map' ) ) )
-  all.style = all.style.concat( c.files.filter( mapExtension( '.wxss' ) ) )
-  all.styleMap = all.styleMap.concat( c.files.filter( mapExtension( '.wxss.map' ) ) )
-  return all
+function reduceChunk( chunks, { cssExt = 'wxss' } ) {
+  return chunks.reduce( ( all, c, i ) => {
+    all.js = all.js || []
+    all.jsMap = all.jsMap || []
+    all.style = all.style || []
+    all.styleMap = all.styleMap || []
+    all.js = all.js.concat( c.files.filter( mapExtension( '.js' ) ) )
+    all.jsMap = all.jsMap.concat( c.files.filter( mapExtension( '.js.map' ) ) )
+    all.style = all.style.concat( c.files.filter( mapExtension( `.${cssExt}` ) ) )
+    all.styleMap = all.styleMap.concat( c.files.filter( mapExtension( `.${cssExt}.map` ) ) )
+    return all
+  }, {} )
 }
 
 function isSplitedChunk( chunk ) {

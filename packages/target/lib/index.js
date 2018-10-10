@@ -2,6 +2,17 @@ const path = require( 'path' )
 const webpack = require( 'webpack' )
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' )
 
+const exts = {
+  wechat: {
+    xml: 'wxml',
+    css: 'wxss'
+  },
+  alipay: {
+    xml: 'axml',
+    css: 'acss'
+  }
+}
+
 function createMegaloTarget( options = {} ) {
   const { platform = 'wechat', htmlParse } = options
 
@@ -18,14 +29,16 @@ function createMegaloTarget( options = {} ) {
     new LoaderTargetPlugin( 'mp-' + platform ).apply( compiler )
     new MegaloPlugin( options ).apply( compiler )
 
+    const { xml, css } = exts[platform] || exts.wechat;
+
     if (htmlParse) {
       new CopyWebpackPlugin([
         {
-          from: path.resolve(htmlParse.src, 'index.wxml'),
+          from: path.resolve(htmlParse.src, `index.${xml}`),
           to: path.resolve(output.path, 'htmlparse')
         },
         {
-          from: path.resolve(htmlParse.src, 'index.wxss'),
+          from: path.resolve(htmlParse.src, `index.${css}`),
           to: path.resolve(output.path, 'htmlparse')
         }
       ]).apply( compiler )

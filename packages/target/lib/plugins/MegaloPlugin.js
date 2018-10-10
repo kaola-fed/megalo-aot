@@ -24,7 +24,7 @@ class MegaloPlugin {
       require( '@megalo/template-compiler' )
 
     // replace globalObject
-    replaceGlobalObject( compiler )
+    replaceGlobalObject( compiler, megaloOptions )
 
     // attach to loaderContext
     attachEntryHelper( compiler )
@@ -53,8 +53,12 @@ class MegaloPlugin {
   }
 }
 
-function replaceGlobalObject( compiler ) {
-  compiler.options.output.globalObject = 'global'
+function replaceGlobalObject( compiler, megaloOptions ) {
+  if (megaloOptions.platform === 'alipay') {
+    compiler.options.output.globalObject = 'my'
+  } else {
+    compiler.options.output.globalObject = 'global'
+  }
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
@@ -64,7 +68,8 @@ function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
     `megalo-plugin-emit`,
     compilation => {
       const entrypoints = compilation.entrypoints
-      const chunkFiles = sortEntrypointFiles( entrypoints )
+      const chunkFiles = sortEntrypointFiles( entrypoints, platform )
+      let codegen
 
       const pagesWithFiles = []
       Object.keys( pages ).map( k => {
@@ -75,23 +80,26 @@ function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
 
       switch( platform ) {
         case 'wechat':
-          const { codegen } = require( '../platforms/wechat' )
-
-          // emit files, includes:
-          // 1. pages (wxml/wxss/js/json)
-          // 2. components
-          // 3. slots
-          // 4. htmlparse
-          codegen(
-            pagesWithFiles,
-            { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions },
-            {
-              compiler,
-              compilation,
-            }
-          )
+          codegen = require( '../platforms/wechat' ).codegen
+          break;
+        case 'alipay':
+          codegen = require( '../platforms/alipay' ).codegen
           break;
       }
+
+      // emit files, includes:
+      // 1. pages (wxml/wxss/js/json)
+      // 2. components
+      // 3. slots
+      // 4. htmlparse
+      codegen(
+        pagesWithFiles,
+        { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions },
+        {
+          compiler,
+          compilation,
+        }
+      )
     }
   )
 }

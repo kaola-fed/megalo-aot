@@ -9,6 +9,6 @@ module.exports = function ( { file, files = {}, htmlParse = false } = {} ) {
   return htmlparse
     .concat( split )
     .concat( main )
-    .map( s => `@import "${ relativeToRoot( file ) }${ s }"` )
-    .join( ';\n' )
+    .map( s => `@import "${ relativeToRoot( file ) }${ s }";` )
+    .join( '\n' )
 }
