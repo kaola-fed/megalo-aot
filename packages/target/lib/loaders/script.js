@@ -33,7 +33,9 @@ module.exports = function ( source ) {
         } )
     } )
   ).then( () => {
-    const realResourcePath = removeExtension( loaderContext.resourcePath, '.js' )
+    const ext = path.extname(loaderContext.resourcePath)
+    let realResourcePath = removeExtension( loaderContext.resourcePath, ext )
+    realResourcePath = /.vue$/.test(realResourcePath) ? realResourcePath : `${realResourcePath}.vue`
     const compilerOptions = {
       name: hashify( realResourcePath ),
       imports: tmp,

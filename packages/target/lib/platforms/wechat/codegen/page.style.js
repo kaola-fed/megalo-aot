@@ -1,8 +1,8 @@
 const relativeToRoot = require( '../utils/relativeToRoot' )
 const constants = require( '../constants' )
 
-module.exports = function ( { file, files = {} } = {} ) {
-  const htmlparse = [ constants.HTMLPARSE_OUTPUT_PATH.STYLE ]
+module.exports = function ( { file, files = {}, htmlParse = false } = {} ) {
+  const htmlparse = htmlParse ? [ constants.HTMLPARSE_OUTPUT_PATH.STYLE ] : []
   const split = files.split.style || []
   const main = files.main.style || []
 
@@ -10,5 +10,5 @@ module.exports = function ( { file, files = {} } = {} ) {
     .concat( split )
     .concat( main )
     .map( s => `@import "${ relativeToRoot( file ) }${ s }"` )
-    .join( '\n' )
+    .join( ';\n' )
 }

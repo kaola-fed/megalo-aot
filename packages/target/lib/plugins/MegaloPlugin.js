@@ -47,7 +47,7 @@ class MegaloPlugin {
     } )
 
     // lazy emit files using `pages` && `allCompilerOptions` && `templates`
-    lazyEmit( compiler, megaloTemplateCompiler )
+    lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
 
     compiler.options.module.rules = rules
   }
@@ -57,8 +57,8 @@ function replaceGlobalObject( compiler ) {
   compiler.options.output.globalObject = 'global'
 }
 
-function lazyEmit( compiler, megaloTemplateCompiler ) {
-  const platform = compiler.options.platform || 'wechat'
+function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
+  const { platform = 'wechat' } = megaloOptions
 
   compiler.hooks.emit.tap(
     `megalo-plugin-emit`,
@@ -84,7 +84,7 @@ function lazyEmit( compiler, megaloTemplateCompiler ) {
           // 4. htmlparse
           codegen(
             pagesWithFiles,
-            { templates, allCompilerOptions, megaloTemplateCompiler },
+            { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions },
             {
               compiler,
               compilation,

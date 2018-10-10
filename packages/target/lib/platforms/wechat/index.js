@@ -10,9 +10,10 @@ const relativeToRoot = require( './utils/relativeToRoot' )
 
 function codegen (
   pages = [],
-  { templates, allCompilerOptions, megaloTemplateCompiler } = {},
+  { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions } = {},
   { compiler, compilation } = {}
 ) {
+  const { htmlParse = false } = megaloOptions
   const generators = [
     [ json, '.json' ],
     [ script, '.js' ],
@@ -22,11 +23,12 @@ function codegen (
 
   pages.forEach( options => {
     const { file } = options
+    const generatorOptions = Object.assign({ htmlParse }, options)
 
     generators.forEach( pair => {
       const generate = pair[ 0 ]
       const extension = pair[ 1 ]
-      emitFile( `${ file }${ extension }`, generate( options ), compilation )
+      emitFile( `${ file }${ extension }`, generate( generatorOptions ), compilation )
     } )
   } )
 
@@ -46,31 +48,33 @@ function codegen (
       src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
         constants.SLOTS_OUTPUT_PATH
     }
-    // add htmlparse
-    imports[ '_htmlparse_' ] = {
-      name: '',
-      src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
-        constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
-    }
 
     let compilerOptions = Object.assign(
       {},
       allCompilerOptions[ resourcePath ],
-      { target: 'wechat', imports },
+      { target: 'wechat', imports, htmlParse }
     )
 
-    const { body, slots } = component( {
+    const { body, slots, needHtmlParse } = component( {
       source,
       compiler: megaloTemplateCompiler,
       compilerOptions,
     } )
 
+    let finalBody = body
     const name = compilerOptions.name
+
+    if (htmlParse && needHtmlParse) {
+      // add htmlparse
+      const htmlPraserSrc = relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
+          constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
+      finalBody = `<import src="${htmlPraserSrc}"/>${body}`
+    }
 
     // emit component
     emitFile(
       constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
-      body,
+      finalBody,
       compilation
     )
 
