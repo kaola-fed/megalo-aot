@@ -13,8 +13,8 @@ exports.codegen = createCodegenFn( {
   generators: [
     [ json, '.json' ],
     [ script, '.js' ],
-    [ style, '.wxss' ],
-    [ template, '.wxml' ],
+    [ style, '.acss' ],
+    [ template, '.axml' ],
   ],
   component,
   slots,
