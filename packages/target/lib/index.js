@@ -10,6 +10,10 @@ const exts = {
   alipay: {
     xml: 'axml',
     css: 'acss'
+  },
+  swan: {
+    xml: 'swan',
+    css: 'css'
   }
 }
 
