@@ -5,6 +5,7 @@ const findRuleByQuery = require( '../utils/findRuleByQuery' )
 const createEntryHelper = require( '../utils/createEntryHelper' )
 const attach = require( '../utils/attachLoaderContext' )
 const sortEntrypointFiles = require( '../utils/sortEntrypointFiles' )
+const removeExtension = require( '../utils/removeExtension' )
 
 const pages = {}
 const allCompilerOptions = {}
@@ -126,14 +127,13 @@ function cacheToPages( { file, config, entryComponent } = {} ) {
 }
 
 function cacheToAllCompilerOptions( resourcePath, compilerOptions = {} ) {
-  if ( /\.vue/.test(resourcePath) ) {
-    resourcePath = resourcePath.replace(/\.vue$/, '')
-  }
+  resourcePath = removeExtension(resourcePath)
   allCompilerOptions[ resourcePath ] = allCompilerOptions[ resourcePath ] || {}
   Object.assign( allCompilerOptions[ resourcePath ], compilerOptions )
 }
 
 function cacheToTemplates( resourcePath, template ) {
+  resourcePath = removeExtension(resourcePath)
   templates[ resourcePath ] = template
 }
 
