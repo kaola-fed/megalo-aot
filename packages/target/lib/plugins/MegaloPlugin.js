@@ -126,6 +126,9 @@ function cacheToPages( { file, config, entryComponent } = {} ) {
 }
 
 function cacheToAllCompilerOptions( resourcePath, compilerOptions = {} ) {
+  if ( /\.vue/.test(resourcePath) ) {
+    resourcePath = resourcePath.replace(/\.vue$/, '')
+  }
   allCompilerOptions[ resourcePath ] = allCompilerOptions[ resourcePath ] || {}
   Object.assign( allCompilerOptions[ resourcePath ], compilerOptions )
 }
