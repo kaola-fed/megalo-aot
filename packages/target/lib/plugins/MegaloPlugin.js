@@ -86,6 +86,9 @@ function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
         case 'alipay':
           codegen = require( '../platforms/alipay' ).codegen
           break;
+        case 'swan':
+          codegen = require( '../platforms/swan' ).codegen
+          break;
       }
 
       // emit files, includes:

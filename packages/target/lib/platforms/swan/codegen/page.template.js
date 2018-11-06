@@ -8,6 +8,6 @@ module.exports = function ( { file, entryComponent } = {} ) {
 
   return `
 <import src="${ relativeToRoot( file ) }${ entryComponentPath }" />
-<template is="${ entryComponent }" data="{{ ...${ROOT_DATA_VAR}['0'], ${ROOT_DATA_VAR} }}"/>
+<template is="${ entryComponent }" data="{{{ ...${ROOT_DATA_VAR}['0'], ${ROOT_DATA_VAR} }}}"/>
   `.trim()
 }

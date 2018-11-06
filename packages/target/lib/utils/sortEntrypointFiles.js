@@ -1,6 +1,8 @@
 module.exports = function ( entrypoints, platform = 'wechat' ) {
   const results = {}
-  const cssExt = platform === 'alipay' ? 'acss' : 'wxss'
+  const cssExt = platform === 'alipay' ? 'acss' :
+                  platform === 'swan' ? 'css' :
+                                      'wxss'
 
   entrypoints.forEach( ( entrypoint, file ) => {
     const chunks = entrypoint.chunks || []
