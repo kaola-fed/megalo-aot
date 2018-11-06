@@ -22,7 +22,8 @@ module.exports = function (source) {
   const compiler = options.compiler
   const compilerOptions = Object.assign({}, options.compilerOptions, {
     scopeId: query.scoped ? `v-${id}` : null,
-    comments: query.comments
+    comments: query.comments,
+    target: this.target.replace(/^mp-/, '')
   })
 
   const realResourcePath = removeExtension( loaderContext.resourcePath )
