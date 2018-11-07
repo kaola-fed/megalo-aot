@@ -20,13 +20,15 @@ module.exports = function (source) {
 
   // allow using custom compiler via options
   const compiler = options.compiler
+
+  const realResourcePath = removeExtension( loaderContext.resourcePath )
+
   const compilerOptions = Object.assign({}, options.compilerOptions, {
     scopeId: query.scoped ? `v-${id}` : null,
     comments: query.comments,
-    target: this.target.replace(/^mp-/, '')
+    target: this.target.replace(/^mp-/, ''),
+    realResourcePath
   })
-
-  const realResourcePath = removeExtension( loaderContext.resourcePath )
 
   loaderContext.megaloCacheToAllCompilerOptions(
     realResourcePath,
