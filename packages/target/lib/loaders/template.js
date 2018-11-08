@@ -1,7 +1,8 @@
-const qs = require('querystring')
-const loaderUtils = require('loader-utils')
+const qs = require( 'querystring' )
+const loaderUtils = require( 'loader-utils' )
 const { compileTemplate } = require('@vue/component-compiler-utils')
 const removeExtension = require( '../utils/removeExtension' )
+const getMD5 = require( '../utils/md5' )
 
 // Loader that compiles raw template into JavaScript functions.
 // This is injected by the global pitcher (../pitch) for template
@@ -22,12 +23,15 @@ module.exports = function (source) {
   const compiler = options.compiler
 
   const realResourcePath = removeExtension( loaderContext.resourcePath )
+  const target = this.target.replace(/^mp-/, '')
+  const md5 = getMD5( source.trim() + target )
 
   const compilerOptions = Object.assign({}, options.compilerOptions, {
     scopeId: query.scoped ? `v-${id}` : null,
     comments: query.comments,
-    target: this.target.replace(/^mp-/, ''),
-    realResourcePath
+    realResourcePath,
+    target,
+    md5
   })
 
   loaderContext.megaloCacheToAllCompilerOptions(
