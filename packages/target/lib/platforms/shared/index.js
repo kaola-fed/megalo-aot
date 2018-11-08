@@ -1,5 +1,8 @@
 const emitFile = require( '../../utils/emitFile' )
 const relativeToRoot = require( './utils/relativeToRoot' )
+const getMD5 = require( '../../utils/md5' )
+
+const compiledComponentTemplates = {}
 
 module.exports = function({
   generators,
@@ -32,14 +35,23 @@ module.exports = function({
     Object.keys( templates ).forEach( resourcePath => {
       const source = templates[ resourcePath ]
       const opts = allCompilerOptions[ resourcePath ] || {}
+      const md5 = getMD5( source )
+      const compiledComponentTemplate = compiledComponentTemplates[ resourcePath ]
+      if (compiledComponentTemplate === md5) {
+        return
+      }
+
+      compiledComponentTemplates[ resourcePath ] = md5
 
       // clone
       const imports = Object.assign( {}, opts.imports || {} )
       Object.keys(imports).forEach( k => {
         const { src } = imports[ k ]
-        Object.assign( imports[ k ], {
-          src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) + `components/${src}`
-        } )
+        if ( !/\.\./.test( src ) ) {
+          Object.assign( imports[ k ], {
+            src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) + `components/${src}`
+          } )
+        }
       } )
       // add slots
       imports[ '_slots_' ] = {
