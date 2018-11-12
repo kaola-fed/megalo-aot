@@ -35,13 +35,6 @@ module.exports = function({
     Object.keys( templates ).forEach( resourcePath => {
       const source = templates[ resourcePath ]
       const opts = allCompilerOptions[ resourcePath ] || {}
-      const md5 = getMD5( source )
-      const compiledComponentTemplate = compiledComponentTemplates[ resourcePath ]
-      if (compiledComponentTemplate === md5) {
-        return
-      }
-
-      compiledComponentTemplates[ resourcePath ] = md5
 
       // clone
       const imports = Object.assign( {}, opts.imports || {} )
@@ -60,37 +53,56 @@ module.exports = function({
           constants.SLOTS_OUTPUT_PATH
       }
 
-      let compilerOptions = Object.assign(
-        {},
-        allCompilerOptions[ resourcePath ],
-        { target: platform, imports, htmlParse }
-      )
+      const importsStr = Object.keys( imports ).reduce( ( res, key ) => {
+        return res += `,${imports[ key ].src}`
+      }, '' )
+      const md5 = getMD5( source + importsStr )
+      const compiledComponentTemplate = compiledComponentTemplates[ resourcePath ] || {}
+      let currentSlots = []
 
-      const { body, slots, needHtmlParse } = component( {
-        source,
-        compiler: megaloTemplateCompiler,
-        compilerOptions,
-      } )
-
-      let finalBody = body
-      const name = compilerOptions.name
-
-      if (htmlParse && needHtmlParse) {
-        // add htmlparse
-        const htmlPraserSrc = relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
-            constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
-        finalBody = `<import src="${htmlPraserSrc}"/>${body}`
+      if (compiledComponentTemplate.md5 !== md5) {
+        let compilerOptions = Object.assign(
+          {},
+          allCompilerOptions[ resourcePath ],
+          { target: platform, imports, htmlParse }
+        )
+  
+        const { body, slots, needHtmlParse } = component( {
+          source,
+          compiler: megaloTemplateCompiler,
+          compilerOptions,
+        } )
+  
+        compiledComponentTemplates[ resourcePath ] = {
+          md5,
+          body,
+          slots,
+          needHtmlParse
+        }
+        currentSlots = slots
+  
+        let finalBody = body
+        const name = compilerOptions.name
+  
+        if (htmlParse && needHtmlParse) {
+          // add htmlparse
+          const htmlPraserSrc = relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
+              constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
+          finalBody = `<import src="${htmlPraserSrc}"/>${body}`
+        }
+  
+        // emit component
+        emitFile(
+          constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
+          finalBody,
+          compilation
+        )
+      } else {
+        currentSlots = compiledComponentTemplate.slots || []
       }
 
-      // emit component
-      emitFile(
-        constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
-        finalBody,
-        compilation
-      )
-
       // collect slots
-      slots.forEach( slot => {
+      currentSlots.forEach( slot => {
         const dependencies = slot.dependencies || []
         const body = slot.body
         dependencies.forEach( d => allSlotImports.add( d ) )
