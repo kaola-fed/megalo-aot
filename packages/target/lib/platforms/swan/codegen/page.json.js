@@ -1,3 +1,6 @@
+const composePlatformConfig = require( '../../shared/utils/composePlatformConfig' )
+
 module.exports = function ( { config } ) {
-  return JSON.stringify( config, 0, 2 )
+  const _config = composePlatformConfig( config, 'swan' )
+  return JSON.stringify( _config, 0, 2 )
 }
