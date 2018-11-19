@@ -1,16 +1,22 @@
 import App from './App'
 import Vue from 'vue'
 
-const mountNode = document.createElement( 'div' )
-mountNode.id = 'app'
-document.body.appendChild( mountNode )
-
 const app = new Vue( App )
 
-app.$mount( '#app' )
+app.$mount()
 
 export default {
   config: {
-    test: 1
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTitleText: 'WeChat',
+      navigationBarTextStyle: 'black'
+    },
+
+    pages: [
+      'pages/counter/index',
+      'pages/todomvc/index',
+    ]
   }
 }

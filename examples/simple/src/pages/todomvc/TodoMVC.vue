@@ -1,13 +1,15 @@
 <template>
   <div class="app">
-    <button @click="onMinus">xx-</button>
+    <button @click="onMinus">-</button>
     {{ counter }}
-    <button @click="onPlus">xxxxx</button>
+    <button @click="onPlus">+</button>
   </div>
 </template>
 
 <script>
 export default {
+  mpType: 'page',
+
   created() {
     console.log( 'created' )
   },
@@ -20,11 +22,11 @@ export default {
 
   methods: {
     onMinus() {
-      this.counter = this.counter - 0
+      this.counter = this.counter - 1
     },
 
     onPlus() {
-      this.counter = this.counter + 2
+      this.counter = this.counter + 1
     },
   }
 }

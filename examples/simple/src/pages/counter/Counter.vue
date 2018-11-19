@@ -1,8 +1,11 @@
 <template>
   <div class="app">
-    <button @click="onMinus">xx-</button>
+    <button @click="onMinus">-</button>
     {{ counter }}
-    <button @click="onPlus">xxxxx</button>
+    <button @click="onPlus">+</button>
+    <abc>
+      slot test
+    </abc>
   </div>
 </template>
 
@@ -10,6 +13,8 @@
 import A from './A.vue'
 
 export default {
+  mpType: 'page',
+
   components: {
     'abc': A,
   },
@@ -25,11 +30,11 @@ export default {
 
   methods: {
     onMinus() {
-      this.counter = this.counter - 0
+      this.counter = this.counter - 1
     },
 
     onPlus() {
-      this.counter = this.counter + 2
+      this.counter = this.counter + 1
     },
   }
 }

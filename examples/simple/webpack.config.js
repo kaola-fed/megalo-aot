@@ -1,34 +1,15 @@
 const path = require( 'path' )
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
-const webpack = require( 'webpack' )
 const createMegaloTarget = require( '@megalo/target' )
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' )
-const compiler = require( 'vue-template-compiler' )
+const compiler = require( '@megalo/template-compiler' )
 
 module.exports = {
 
   mode: 'development',
 
   target: createMegaloTarget( {
-    compiler: Object.assign( compiler, {
-      compileToTemplate( content, { target, name, scopeId, imports = [] } = {} ) {
-        return {
-          body: 'main',
-          slots: [
-            {
-              dependencies: [ 'dep1', 'dep2' ],
-              body: '<template name="slot1"><template is="dep1" /></tempalte>',
-            },
-
-            {
-              dependencies: [ 'dep8', 'dep9' ],
-              body: '<template name="slot2"><template is="dep8" /></tempalte>',
-            }
-          ],
-        }
-      }
-    } ),
+    compiler: compiler,
     platform: 'wechat',
   } ),
 
@@ -64,7 +45,10 @@ module.exports = {
   devtool: 'cheap-source-map',
 
   resolve: {
-    extensions: ['.vue', '.js', '.json']
+    extensions: ['.vue', '.js', '.json'],
+    alias: {
+      'vue': 'megalo', 
+    },
   },
 
   module: {
@@ -109,7 +93,6 @@ module.exports = {
 
   plugins: [
     new VueLoaderPlugin(),
-    new HtmlWebpackPlugin(),
     // new webpack.HotModuleReplacementPlugin(),
     new MiniCssExtractPlugin( {
       filename: 'static/css/[name].wxss',
