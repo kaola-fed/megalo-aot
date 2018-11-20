@@ -21,8 +21,8 @@ function createMegaloTarget( options = {} ) {
   const { platform = 'wechat', framework = 'vue', htmlParse } = options
   
   const FrameworkPlugin = framework === 'vue' ?
-    require( './frameworks/vue/plugins/VuePlugin' ) :
-    require( './frameworks/regular/plugins/RegularPlugin' )
+    require( './frameworks/vue/plugin/VuePlugin' ) :
+    require( './frameworks/regular/plugin/RegularPlugin' )
 
   return function ( compiler ) {
     const compilerOptions = compiler.options || {}

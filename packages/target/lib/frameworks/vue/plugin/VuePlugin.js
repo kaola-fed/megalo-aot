@@ -44,7 +44,7 @@ function replaceVueTemplateCompiler( { rules, compiler } ) {
   } )
   const vueUseLoader = vueUse[ vueUseLoaderIndex ]
 
-  // override compiler for `vue-loader` and `./loaders/vue`
+  // override compiler for `vue-loader` and `./loader/vue`
   vueUseLoader.options.compiler = compiler
 }
 
@@ -58,7 +58,7 @@ function hookEntry( { rules } ) {
 
   const megaloEntryLoader = {
     options: {},
-    loader: require.resolve( '../loaders/entry' )
+    loader: require.resolve( '../loader/entry' )
   }
 
   entryUse.splice( babelUseLoaderIndex + 1, 0, megaloEntryLoader )
@@ -71,7 +71,7 @@ function replacePitcher( { rules } ) {
   const vuePitcherLoader = vuePitcherUse[ 0 ]
 
   // replace
-  vuePitcherLoader.loader = require.resolve( '../loaders/pitcher' )
+  vuePitcherLoader.loader = require.resolve( '../loader/pitcher' )
 }
 
 module.exports = VuePlugin
