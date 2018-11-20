@@ -1,6 +1,6 @@
 const qs = require( 'querystring' )
 const { compileStyle } = require( '@vue/component-compiler-utils' )
-const scoped = require( '../postcss-plugins/scoped' )
+const scoped = require( '../../../postcss-plugins/scoped' )
 
 // This is a post loader that handles scoped CSS transforms.
 // Injected right before css-loader by the global pitcher (../pitch.js)
