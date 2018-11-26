@@ -1,12 +1,12 @@
 {
-  "name": "simple",
+  "name": "vue-mp",
   "version": "0.0.3-0",
   "description": "",
   "main": "index.js",
   "private": true,
   "scripts": {
-    "demo:simple": "webpack -w",
-    "demo:dev-server": "webpack-dev-server"
+    "dev": "webpack -w",
+    "serve": "webpack-dev-server"
   },
   "keywords": [],
   "author": "",

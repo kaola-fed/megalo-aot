@@ -18,11 +18,12 @@ const exts = {
 }
 
 function createMegaloTarget( options = {} ) {
-  const { platform = 'wechat', framework = 'vue', htmlParse } = options
-  
-  const FrameworkPlugin = framework === 'vue' ?
-    require( './frameworks/vue/plugin/VuePlugin' ) :
-    require( './frameworks/regular/plugin/RegularPlugin' )
+  const { platform = 'wechat', htmlParse } = options
+
+  const FrameworkPlugins = [
+    require( './frameworks/vue/plugin' ),
+    require( './frameworks/regular/plugin' )
+  ]
 
   return function ( compiler ) {
     const compilerOptions = compiler.options || {}
@@ -36,7 +37,7 @@ function createMegaloTarget( options = {} ) {
     new JsonpTemplatePlugin().apply( compiler )
     new LoaderTargetPlugin( 'mp-' + platform ).apply( compiler )
     new MegaloPlugin( options ).apply( compiler )
-    new FrameworkPlugin( options ).apply( compiler )
+    FrameworkPlugins.forEach( Plugin => new Plugin( options ).apply( compiler ) )
 
     const { xml, css } = exts[platform] || exts.wechat;
 

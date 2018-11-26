@@ -7,3 +7,5 @@ class RegularPlugin {
     
   }
 }
+
+module.exports = RegularPlugin
