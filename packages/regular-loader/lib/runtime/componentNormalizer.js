@@ -24,7 +24,12 @@ export default function(script, template, scopedId) {
       }
     }
   } else if( typeof script === "function" && ( script.prototype instanceof Regular ) ) {
-    script.prototype.template = template.ast;
+    if ( template.template ) {
+      script.prototype.template = template.template;
+    }
+    if (template.expressions) {
+      script.prototype.expressions = template.expressions;
+    }
     Ctor = script;
   }
 
