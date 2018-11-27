@@ -40,7 +40,7 @@ class FrameworkPlugin {
   }
 }
 
-// add our loader before vue-loader
+// add our loader before [framework]-loader
 function replaceTemplateCompiler( { rules, compiler, files = [], frameworkLoaderRegexp } ) {
   const rule = findRuleByFile( rules, files )
 
