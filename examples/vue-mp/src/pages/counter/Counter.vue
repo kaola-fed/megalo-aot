@@ -5,18 +5,21 @@
     <button @click="onPlus">+</button>
     <abc>
       slot test
+      <B />
     </abc>
   </div>
 </template>
 
 <script>
 import A from './A.vue'
+import B from './B.vue'
 
 export default {
   mpType: 'page',
 
   components: {
     'abc': A,
+    B,
   },
   created() {
     console.log( 'created' )

@@ -1,9 +1,9 @@
 const path = require( 'path' )
 const babel = require( 'babel-core' )
-const extractConfigPlugin = require( '../../../babel-plugins/extract-config' )
-const entryComponentPlugin = require( '../../../babel-plugins/entry-component' )
-const resolveSource = require( '../../../utils/resolveSource' )
-const hashify = require( '../../../utils/hashify' )
+const extractConfigPlugin = require( '../babel-plugins/extract-config' )
+const entryComponentPlugin = require( '../babel-plugins/entry-component' )
+const resolveSource = require( '../utils/resolveSource' )
+const hashify = require( '../utils/hashify' )
 
 module.exports = function ( source ) {
   const loaderContext = this

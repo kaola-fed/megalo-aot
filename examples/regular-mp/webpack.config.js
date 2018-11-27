@@ -1,8 +1,8 @@
 const path = require( 'path' )
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const RegularLoaderPlugin = require('@megalo/regular-loader/lib/plugin')
 const createMegaloTarget = require( '@megalo/target' )
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' )
-const compiler = require( '@megalo/template-compiler' )
+const compiler = require( '@megalo/regular-template-compiler' )
 
 module.exports = {
 
@@ -15,9 +15,7 @@ module.exports = {
 
   entry: {
     'app': path.resolve( __dirname, 'src/index.js' ),
-    // 'packageA/pages/a/index': path.resolve( __dirname, 'src/index.js' ),
     'pages/counter/index': path.resolve( __dirname, 'src/pages/counter/index.js' ),
-    'pages/todomvc/index': path.resolve( __dirname, 'src/pages/todomvc/index.js' ),
   },
 
   output: {
@@ -45,9 +43,9 @@ module.exports = {
   devtool: 'cheap-source-map',
 
   resolve: {
-    extensions: ['.vue', '.js', '.json'],
+    extensions: ['.rgl', '.js', '.json'],
     alias: {
-      'vue': 'megalo',
+      'regularjs': 'mpregular',
     },
   },
 
@@ -55,10 +53,10 @@ module.exports = {
     rules: [
       // ... other rules
       {
-        test: /\.vue$/,
+        test: /\.rgl/,
         use: [
           {
-            loader: 'vue-loader',
+            loader: '@megalo/regular-loader',
             options: {}
           }
         ]
@@ -89,7 +87,7 @@ module.exports = {
   },
 
   plugins: [
-    new VueLoaderPlugin(),
+    new RegularLoaderPlugin(),
     new MiniCssExtractPlugin( {
       filename: 'static/css/[name].wxss',
     } ),

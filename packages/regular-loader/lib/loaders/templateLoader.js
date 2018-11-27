@@ -18,7 +18,7 @@ module.exports = function (source) {
   const filename = this.resourcePath
 
   // allow using custom compiler via options
-  const compiler = options.compiler || require('../compiler')
+  const compiler = options.compiler || require('@megalo/regular-template-compiler')
   const compilerOptions = Object.assign({}, options.compilerOptions, {
     scopeId: query.scoped ? `data-r-${id}` : null,
     comments: query.comments
@@ -45,7 +45,7 @@ module.exports = function (source) {
   const { code } = compiled
 
   // finish with ESM exports
-  return code + `\nexport { ast }`
+  return code + `\nexport { template, expressions }`
 }
 
 function pad (source) {

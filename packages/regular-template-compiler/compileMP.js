@@ -1,10 +1,14 @@
 const Regular = require( 'regularjs' )
 const htmlMinifier = require( 'html-minifier' )
+const compileToTemplate = require( './lib' )
 
 module.exports = function( source = {}, options = {} ) {
   const { scopeId } = options
 
-  const ast = Regular.parse( source )
+  const {
+      ast,
+      expressions,
+  } = compileToTemplate( source, options )
 
   if ( scopeId ) {
     walkElement( ast, function ( node ) {
@@ -22,13 +26,47 @@ module.exports = function( source = {}, options = {} ) {
     }
   } )
 
+  const transformedExpressionsStr = transformExpressions( expressions )
+
   let code = `
-    var ast = ${ transformedAstStr };
+    var template = ${ transformedAstStr };
+    var expressions = ${ transformedExpressionsStr };
   `
 
   return {
     code,
   }
+}
+
+function transformExpressions( expressions ) {
+  const get = expressions.get || {}
+  const set = expressions.set || {}
+
+  let str = `{
+    get: {`
+
+  each( get, ( fn, body ) => {
+    str = str + '"' + body + '":' + fn.toString() + ',\n'
+  } )
+
+  str += `},
+    set: {`
+
+  each( set, ( fn, body ) => {
+    str = str + '"' + body + '":' + fn.toString() + ',\n'
+  } )
+
+  str += `}
+    }`
+
+  return str
+}
+
+function each( obj, fn ) {
+  Object.keys(obj).forEach( key => {
+    const value = obj[key]
+    fn(value, key)
+  } )
 }
 
 function transformAst( ast, options = {}) {

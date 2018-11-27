@@ -50,7 +50,7 @@ module.exports = function (source) {
 
   const descriptor = parse({
     source,
-    compiler: options.compiler || require( './compiler' ),
+    compiler: options.compiler || require( '@megalo/regular-template-compiler' ),
     filename,
     sourceRoot,
     needMap: sourceMap
@@ -96,7 +96,7 @@ module.exports = function (source) {
     const attrsQuery = attrsToQuery(descriptor.template.attrs)
     const query = `?rgl&type=template${idQuery}${scopedQuery}${attrsQuery}${inheritQuery}`
     const request = templateRequest = stringifyRequest(src + query)
-    templateImport = `import { ast } from ${request}`
+    templateImport = `import * as template from ${request}`
   }
 
   // script
@@ -133,7 +133,7 @@ ${stylesCode}
 import normalizer from ${stringifyRequest(`!${componentNormalizerPath}`)}
 var component = normalizer(
   script,
-  ast,
+  template,
   ${hasScoped ? JSON.stringify(id) : `null`},
 )
   `.trim() + `\n`

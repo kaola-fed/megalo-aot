@@ -18,6 +18,8 @@ class MegaloPlugin {
 
   apply( compiler ) {
     const compilerOptions = compiler.options
+    const rawRules = compilerOptions.module.rules
+    const { rules } = new RuleSet( rawRules )
     const megaloOptions = this.options
     const megaloTemplateCompiler = megaloOptions.compiler ||
       require( '@megalo/template-compiler' )
@@ -25,12 +27,24 @@ class MegaloPlugin {
     // replace globalObject
     replaceGlobalObject( compiler, megaloOptions )
 
+    // generate pages
+    hookEntry( {
+      rules,
+      files: [ 'foo.js', 'foo.ts' ],
+      entryLoader: {
+        options: {},
+        loader: require.resolve( '../loaders/entry' ),
+      },
+    } )
+
     // attach to loaderContext
     attachEntryHelper( compiler )
     attachCacheAPI( compiler )
 
     // lazy emit files using `pages` && `allCompilerOptions` && `templates`
     lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
+
+    compiler.options.module.rules = rules
   }
 }
 
@@ -40,6 +54,22 @@ function replaceGlobalObject( compiler, megaloOptions ) {
   } else {
     compiler.options.output.globalObject = 'global'
   }
+}
+
+// [framework]-loader clones babel-loader rule, we shall ignore it
+function hookEntry( { rules, files = {}, entryLoader } ) {
+  const entryRule = findRuleByFile( rules, files )
+
+  if ( !entryRule ) {
+    return
+  }
+
+  const entryUse = entryRule.use
+  const babelUseLoaderIndex = entryUse.findIndex( u => {
+    return /^babel-loader|(\/|\\|@)babel-loader/.test( u.loader )
+  } )
+
+  entryUse.splice( babelUseLoaderIndex + 1, 0, entryLoader )
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {

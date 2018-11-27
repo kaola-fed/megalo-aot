@@ -1,15 +1,21 @@
-export default function(script, ast, scopedId) {
+export default function(script, template, scopedId) {
   var options = { scopedId: scopedId };
   var Regular = require('regularjs');
 
   script = script || {};
+  template = template || {};
 
   if (script.__esModule) script = script["default"];
   if (Regular.__esModule) Regular = Regular["default"];
 
   var Ctor, components;
   if( typeof script === "object" ) {
-    script.template = ast;
+    if (template.template) {
+      script.template = template.template || '';
+    }
+    if (template.expressions) {
+      script.expressions = template.expressions;
+    }
     Ctor = Regular.extend(script);
     components = script.components || script.component;
     if( typeof components === "object" ) {
@@ -18,7 +24,7 @@ export default function(script, ast, scopedId) {
       }
     }
   } else if( typeof script === "function" && ( script.prototype instanceof Regular ) ) {
-    script.prototype.template = ast;
+    script.prototype.template = template.ast;
     Ctor = script;
   }
 
