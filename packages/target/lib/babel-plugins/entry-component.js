@@ -1,7 +1,7 @@
 module.exports = function ( { types: t } ) {
   return {
     visitor: {
-      ImportDeclaration( path ) {
+      ImportDeclaration( path ) { // for vue
         const bindings = path.scope.bindings
         if (
           t.isStringLiteral( path.node.source ) &&
@@ -22,8 +22,35 @@ module.exports = function ( { types: t } ) {
             }
           }
         }
+      },
 
-      }
+      Identifier( path ) { // for regular
+        const bindings = path.scope.bindings
+        const is$inject = path.isIdentifier( { name: '$inject' } )
+        const isMemberExpression = t.isMemberExpression( path.parentPath )
+        const isCallExpression = t.isCallExpression( path.parentPath.parentPath )
+
+        if ( !bindings ) {
+          return
+        }
+
+        if ( is$inject && isMemberExpression && isCallExpression ) {
+          if ( t.isIdentifier( path.parentPath.node.object ) ) {
+            const identifier = path.parentPath.node.object
+            const identifierName = identifier.name
+
+            const declaration = bindings[ identifierName ]
+            if ( t.isVariableDeclarator( declaration.path.node ) ) {
+              const node = declaration.path.node
+              if ( t.isIdentifier( node.init.callee ) ) {
+                const ctorName = node.init.callee.name
+
+                path.hub.file.metadata.megaloEntryComponent = findSource( ctorName, bindings )
+              }
+            }
+          }
+        }
+      },
     }
   }
 

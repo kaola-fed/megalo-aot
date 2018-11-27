@@ -1,0 +1,14 @@
+<template>
+  <div class="child">child</div>
+</template>
+
+<script>
+
+</script>
+
+<style scoped>
+  .child {
+    background-color: grey;
+    color: green;
+  }
+</style>

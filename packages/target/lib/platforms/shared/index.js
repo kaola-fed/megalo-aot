@@ -17,6 +17,7 @@ module.exports = function({
   ) {
     const { htmlParse = false, platform } = megaloOptions
 
+    // emit page stuff
     pages.forEach( options => {
       const { file } = options
       const generatorOptions = Object.assign({ htmlParse }, options)
@@ -66,31 +67,31 @@ module.exports = function({
           allCompilerOptions[ resourcePath ],
           { target: platform, imports, htmlParse }
         )
-  
+
         const { body, slots, needHtmlParse } = component( {
           source,
           compiler: megaloTemplateCompiler,
           compilerOptions,
         } )
-  
+
         compiledComponentTemplates[ resourcePath ] = {
           md5,
           body,
           slots,
           needHtmlParse
         }
-        currentSlots = slots
-  
+        currentSlots = slots || []
+
         let finalBody = body
         const name = compilerOptions.name
-  
+
         if (htmlParse && needHtmlParse) {
           // add htmlparse
           const htmlPraserSrc = relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
               constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
           finalBody = `<import src="${htmlPraserSrc}"/>${body}`
         }
-  
+
         // emit component
         emitFile(
           constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),

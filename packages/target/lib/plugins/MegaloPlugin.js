@@ -27,25 +27,19 @@ class MegaloPlugin {
     // replace globalObject
     replaceGlobalObject( compiler, megaloOptions )
 
-    // attach to loaderContext
-    attachEntryHelper( compiler )
-    attachCacheAPI( compiler )
-
-    // generate components
-    replaceVueTemplateCompiler( {
-      rules,
-      compiler: megaloTemplateCompiler,
-    } )
-
     // generate pages
     hookEntry( {
       rules,
+      files: [ 'foo.js', 'foo.ts' ],
+      entryLoader: {
+        options: {},
+        loader: require.resolve( '../loaders/entry' ),
+      },
     } )
 
-    // transpile `scoped` attribute to class
-    replacePitcher( {
-      rules,
-    } )
+    // attach to loaderContext
+    attachEntryHelper( compiler )
+    attachCacheAPI( compiler )
 
     // lazy emit files using `pages` && `allCompilerOptions` && `templates`
     lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
@@ -60,6 +54,22 @@ function replaceGlobalObject( compiler, megaloOptions ) {
   } else {
     compiler.options.output.globalObject = 'global'
   }
+}
+
+// [framework]-loader clones babel-loader rule, we shall ignore it
+function hookEntry( { rules, files = {}, entryLoader } ) {
+  const entryRule = findRuleByFile( rules, files )
+
+  if ( !entryRule ) {
+    return
+  }
+
+  const entryUse = entryRule.use
+  const babelUseLoaderIndex = entryUse.findIndex( u => {
+    return /^babel-loader|(\/|\\|@)babel-loader/.test( u.loader )
+  } )
+
+  entryUse.splice( babelUseLoaderIndex + 1, 0, entryLoader )
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
@@ -138,46 +148,6 @@ function cacheToAllCompilerOptions( resourcePath, compilerOptions = {} ) {
 function cacheToTemplates( resourcePath, template ) {
   resourcePath = removeExtension(resourcePath)
   templates[ resourcePath ] = template
-}
-
-
-// add our loader before vue-loader
-function replaceVueTemplateCompiler( { rules, compiler } ) {
-  const vueRule = findRuleByFile( rules, [ 'foo.vue', 'foo.vue.html' ] )
-  const vueUse = vueRule.use
-  const vueUseLoaderIndex = vueUse.findIndex( u => {
-    return /^vue-loader|(\/|\\|@)vue-loader/.test( u.loader )
-  } )
-  const vueUseLoader = vueUse[ vueUseLoaderIndex ]
-
-  // override compiler for `vue-loader` and `./loaders/vue`
-  vueUseLoader.options.compiler = compiler
-}
-
-// vue-loader clones babel-loader rule, we shall ignore it
-function hookEntry( { rules } ) {
-  const entryRule = findRuleByFile( rules, [ 'foo.js', 'foo.ts' ] )
-  const entryUse = entryRule.use
-  const babelUseLoaderIndex = entryUse.findIndex( u => {
-    return /^babel-loader|(\/|\\|@)babel-loader/.test( u.loader )
-  } )
-
-  const megaloEntryLoader = {
-    options: {},
-    loader: require.resolve( '../loaders/entry' )
-  }
-
-  entryUse.splice( babelUseLoaderIndex + 1, 0, megaloEntryLoader )
-}
-
-// use our own pitcher override vue-loader pitcher
-function replacePitcher( { rules } ) {
-  const vuePitcherRule = findRuleByQuery( rules, [ '?vue&' ] )
-  const vuePitcherUse = vuePitcherRule.use
-  const vuePitcherLoader = vuePitcherUse[ 0 ]
-
-  // replace
-  vuePitcherLoader.loader = require.resolve( '../loaders/pitcher' )
 }
 
 module.exports = MegaloPlugin

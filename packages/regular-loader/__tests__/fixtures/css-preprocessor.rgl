@@ -1,0 +1,17 @@
+<template>
+	<div class="foo">foo</div>
+</template>
+
+<script>
+	export default {
+		config() {}
+	}
+</script>
+
+<style lang="less">
+	@color: #eee;
+
+	.css-preprocessor {
+		color: @color;
+	}
+</style>
