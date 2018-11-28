@@ -7,9 +7,7 @@ module.exports = function ( source ) {
   const loaderContext = this
   const callback = loaderContext.async()
 
-  const ext = path.extname(loaderContext.resourcePath)
-  let realResourcePath = removeExtension( loaderContext.resourcePath, ext )
-  realResourcePath = /.vue$/.test(realResourcePath) ? realResourcePath : `${realResourcePath}.vue`
+  let realResourcePath = removeExtension( loaderContext.resourcePath )
 
   extractCompilerOptionsFromScriptSource( source, loaderContext )
     .then( compilerOptions => {
