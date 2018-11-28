@@ -55,10 +55,10 @@ module.exports = function({
       // clone
       const imports = Object.assign( {}, opts.imports || {} )
       Object.keys(imports).forEach( k => {
-        const { src } = imports[ k ]
+        const { src, resolved} = imports[ k ]
         if ( !/\.\./.test( src ) ) {
           Object.assign( imports[ k ], {
-            src: (root !== '.' ? '../' :relativeToRoot( COMPONENT_OUTPUT_PATH )) + `components/${src}`
+            src: relativeToRoot( COMPONENT_OUTPUT_PATH ) + (root !== '.' && RegExp(`src/${root}/`).test(resolved) ? `${root}/` : '') + `components/${src}`
           } )
         }
       } )
