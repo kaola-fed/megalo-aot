@@ -14,10 +14,6 @@ module.exports = function( source, loaderContext ) {
     ]
   }
 
-  if ( semver.gt( babel.version, '7.0.0' ) ) {
-    babelOptions.rootMode = 'upward'
-  }
-
   const ast = babel.transform( source, babelOptions )
 
   const components = ast.metadata.megaloComponents || {}

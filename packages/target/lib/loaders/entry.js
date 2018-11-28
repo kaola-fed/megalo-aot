@@ -22,10 +22,6 @@ module.exports = function ( source ) {
       ]
     }
 
-    if ( semver.gt( babel.version, '7.0.0' ) ) {
-      babelOptions.rootMode = 'upward'
-    }
-
     const ast = babel.transform( source, babelOptions )
 
     const megaloConfig = ( ast.metadata.megaloConfig && ast.metadata.megaloConfig.value ) || {}
