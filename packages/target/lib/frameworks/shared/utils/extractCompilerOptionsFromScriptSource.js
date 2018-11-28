@@ -1,17 +1,24 @@
 const path = require( 'path' )
-const babel = require( 'babel-core' )
+const semver = require( 'semver' )
+const { babel } = require( '../../../utils/babel' )
 const extractComponentsPlugin = require( '../../../babel-plugins/extract-components' )
 const resolveSource = require( '../../../utils/resolveSource' )
 const hashify = require( '../../../utils/hashify' )
 const removeExtension = require( '../../../utils/removeExtension' )
 
 module.exports = function( source, loaderContext ) {
-  const ast = babel.transform( source, {
-    extends: path.resolve( process.cwd(), '.babelrc' ),
+  const babelOptions = {
+    filename: loaderContext.resourcePath,
     plugins: [
       extractComponentsPlugin
     ]
-  } )
+  }
+
+  if ( semver.gt( babel.version, '7.0.0' ) ) {
+    babelOptions.rootMode = 'upward'
+  }
+
+  const ast = babel.transform( source, babelOptions )
 
   const components = ast.metadata.megaloComponents || {}
 
