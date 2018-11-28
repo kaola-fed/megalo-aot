@@ -30,9 +30,7 @@ module.exports = function( source, loaderContext ) {
         } )
     } )
   ).then( () => {
-    const ext = path.extname(loaderContext.resourcePath)
-    let realResourcePath = removeExtension( loaderContext.resourcePath, ext )
-    realResourcePath = /.rgl$/.test(realResourcePath) ? realResourcePath : `${realResourcePath}.rgl`
+    let realResourcePath = removeExtension( loaderContext.resourcePath )
     const compilerOptions = {
       name: hashify( realResourcePath ),
       imports: tmp,
