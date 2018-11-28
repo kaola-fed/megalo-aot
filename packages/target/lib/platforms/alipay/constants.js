@@ -1,4 +1,4 @@
-exports.COMPONENT_OUTPUT_PATH = 'components/[name].axml'
+exports.COMPONENT_OUTPUT_PATH = '[root]/components/[name].axml'
 
 exports.SLOTS_OUTPUT_PATH = 'components/slots.axml'
 

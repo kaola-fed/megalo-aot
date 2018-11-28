@@ -1,4 +1,4 @@
-exports.COMPONENT_OUTPUT_PATH = 'components/[name].wxml'
+exports.COMPONENT_OUTPUT_PATH = '[root]/components/[name].wxml'
 
 exports.SLOTS_OUTPUT_PATH = 'components/slots.wxml'
 

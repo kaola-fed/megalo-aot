@@ -16,6 +16,7 @@ module.exports = function({
     { compiler, compilation } = {}
   ) {
     const { htmlParse = false, platform } = megaloOptions
+    const { subPackagesRoot } = compiler
 
     // emit page stuff
     pages.forEach( options => {
@@ -36,6 +37,20 @@ module.exports = function({
     Object.keys( templates ).forEach( resourcePath => {
       const source = templates[ resourcePath ]
       const opts = allCompilerOptions[ resourcePath ] || {}
+      let page = pages.find(p=>opts.name === p.entryComponent)
+
+      // get page root
+      if ( !page ){
+        for(let i in subPackagesRoot){
+          let root = subPackagesRoot[i]
+          if( RegExp(`src/${root}/`).test(resourcePath) ){
+            page = { root }
+            break
+          }
+        }
+      }
+      const { root = '.'} = page || {}
+      const COMPONENT_OUTPUT_PATH = constants.COMPONENT_OUTPUT_PATH.replace( /\[root\]\//g, root == '.' ? '' : `${root}/` )
 
       // clone
       const imports = Object.assign( {}, opts.imports || {} )
@@ -43,14 +58,14 @@ module.exports = function({
         const { src } = imports[ k ]
         if ( !/\.\./.test( src ) ) {
           Object.assign( imports[ k ], {
-            src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) + `components/${src}`
+            src: (root !== '.' ? '../' :relativeToRoot( COMPONENT_OUTPUT_PATH )) + `components/${src}`
           } )
         }
       } )
       // add slots
       imports[ '_slots_' ] = {
         name: '',
-        src: relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
+        src: relativeToRoot( COMPONENT_OUTPUT_PATH ) +
           constants.SLOTS_OUTPUT_PATH
       }
 
@@ -87,14 +102,14 @@ module.exports = function({
 
         if (htmlParse && needHtmlParse) {
           // add htmlparse
-          const htmlPraserSrc = relativeToRoot( constants.COMPONENT_OUTPUT_PATH ) +
+          const htmlPraserSrc = relativeToRoot( COMPONENT_OUTPUT_PATH ) +
               constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
           finalBody = `<import src="${htmlPraserSrc}"/>${body}`
         }
 
         // emit component
         emitFile(
-          constants.COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
+          COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
           finalBody,
           compilation
         )

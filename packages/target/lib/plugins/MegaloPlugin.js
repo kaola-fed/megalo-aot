@@ -6,6 +6,7 @@ const createEntryHelper = require( '../utils/createEntryHelper' )
 const attach = require( '../utils/attachLoaderContext' )
 const sortEntrypointFiles = require( '../utils/sortEntrypointFiles' )
 const removeExtension = require( '../utils/removeExtension' )
+const { getPackagesRoot } = require( '../utils/subPackages' )
 
 const pages = {}
 const allCompilerOptions = {}
@@ -78,15 +79,29 @@ function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
   compiler.hooks.emit.tap(
     `megalo-plugin-emit`,
     compilation => {
-      const entrypoints = compilation.entrypoints
+      const { entrypoints, assets } = compilation || {}
       const chunkFiles = sortEntrypointFiles( entrypoints, platform )
+      const subPackagesRoot = getPackagesRoot(pages) || []
+      compiler.subPackagesRoot = subPackagesRoot
       let codegen
 
       const pagesWithFiles = []
       Object.keys( pages ).map( k => {
         const page = pages[ k ] || {}
         const files = chunkFiles[ k ]
-        pagesWithFiles.push( Object.assign( {}, page, { files } ) )
+        const root = subPackagesRoot[ k ] || '.'
+        // reset assets
+        if(root !== '.'){
+          const regReg = new RegExp(`^(./)?([^\\s\\.]*/)(${root}/)`)
+          Object.keys( assets ).map( a => {
+            if(regReg.test(a)){
+              let rename = a.replace(regReg,'$1$3$2')
+              assets[rename] = assets[a]
+              delete assets[a]
+            }
+          })
+        }
+        pagesWithFiles.push( Object.assign( {}, page, { files, root } ) )
       } )
 
       switch( platform ) {

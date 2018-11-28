@@ -1,4 +1,4 @@
-exports.COMPONENT_OUTPUT_PATH = 'components/[name].swan'
+exports.COMPONENT_OUTPUT_PATH = '[root]/components/[name].swan'
 
 exports.SLOTS_OUTPUT_PATH = 'components/slots.swan'
 
