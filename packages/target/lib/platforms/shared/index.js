@@ -155,11 +155,11 @@ function normalizeImports( {
     const { name, resolved } = imports[ k ]
 
     const subpackage = subpackagesUtil.findSubpackage( resolved, subpackages )
-    const root = subpackage ? subpackage.root : ''
+    const root = subpackage ? subpackage.root + '/' : ''
 
     const src = relativeToRoot( importeeOutPath ) +
       constants.COMPONENT_OUTPUT_PATH
-        .replace( /\[root\]/g, root + '/' )
+        .replace( /\[root\]/g, root )
         .replace( /\[name\]/g, name ) +
       extensions.template
 
