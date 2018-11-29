@@ -37,7 +37,9 @@ module.exports = function ( source ) {
         loaderContext.megaloCacheToPages( {
           file: entryKey,
           config: megaloConfig,
-          entryComponent: hashify( resolved ),
+          entryComponent: {
+            name: hashify( resolved ),
+          },
         } )
 
         callback( null, source )

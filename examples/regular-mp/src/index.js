@@ -20,6 +20,15 @@ export default {
 
     pages: [
       'pages/counter/index',
+    ],
+
+    subpackages: [
+      {
+        root: 'package',
+        pages: [
+          'pages/demo/index'
+        ]
+      }
     ]
   }
 }

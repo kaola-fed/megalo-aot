@@ -5,19 +5,21 @@ const template = require( './codegen/page.template' )
 const component = require( './codegen/component' )
 const slots = require( './codegen/slots' )
 
-const constants = require( './constants' )
-
-const createCodegenFn = require('../shared')
+const createCodegenFn = require( '../shared' )
 
 exports.codegen = createCodegenFn( {
-  generators: [
-    [ json, '.json' ],
-    [ script, '.js' ],
-    [ style, '.wxss' ],
-    [ template, '.wxml' ],
-  ],
-  component,
-  slots,
-  constants
+  generators: {
+    json,
+    script,
+    style,
+    template,
+    component,
+    slots,
+  },
+  extensions: {
+    json: '.json',
+    script: '.js',
+    style: '.wxss',
+    template: '.wxml',
+  },
 } )
-exports.constants = constants

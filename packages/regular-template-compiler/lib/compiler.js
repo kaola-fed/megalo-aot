@@ -68,7 +68,17 @@ class Compiler {
     const slots = this.renderSlots( this.usedSlots )
 
     const dependencies = this.usedComponents
-      .map( c => c.src )
+      .map( c => {
+        // find the same name in imports
+        const foundKey = Object.keys( this.options.imports )
+          .find( key => {
+            const { name, src } = this.options.imports[ key ]
+            return name === c.name
+          } )
+        const found = this.options.imports[ foundKey ]
+
+        return found && found.src
+      } )
 
     return {
       slots: Object.keys( this.usedSlots.default )

@@ -15,7 +15,7 @@ module.exports = {
 
   entry: {
     'app': path.resolve( __dirname, 'src/index.js' ),
-    // 'packageA/pages/a/index': path.resolve( __dirname, 'src/index.js' ),
+    'package/pages/demo/index': path.resolve( __dirname, 'src/package/pages/demo/index.js' ),
     'pages/counter/index': path.resolve( __dirname, 'src/pages/counter/index.js' ),
     'pages/todomvc/index': path.resolve( __dirname, 'src/pages/todomvc/index.js' ),
   },
