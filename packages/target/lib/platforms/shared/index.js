@@ -17,20 +17,25 @@ module.exports = function( {
   ) {
     const { htmlParse = false, platform } = megaloOptions
 
+    let htmlParsePaths = {
+      template: constants.HTMLPARSE_TEMPLATE_OUTPUT_PATH + extensions.template,
+      style: constants.HTMLPARSE_STYLE_OUTPUT_PATH + extensions.style,
+    }
+
     // emit page stuff
     pages.forEach( options => {
       const { file } = options
+
       const generatorOptions = normalizeGeneratorOptions(
-        Object.assign( {}, options, { htmlParse } ),
+        Object.assign( {}, options, { htmlParse, htmlParsePaths } ),
         { constants, extensions }
       )
 
       ;[ 'json', 'script', 'style', 'template' ].forEach( type => {
-        emitFile(
-          `${ file }${ extensions[ type ] }`,
-          generators[ type ]( generatorOptions ),
-          compilation
-        )
+        const generated = generators[ type ]( generatorOptions )
+        const outPath = `${ file }${ extensions[ type ] }`
+
+        emitFile( outPath, generated, compilation )
       } )
     } )
 
@@ -97,6 +102,8 @@ module.exports = function( {
           const htmlPraserSrc = relativeToRoot( importeeOutPath ) +
             constants.HTMLPARSE_TEMPLATE_OUTPUT_PATH +
             extensions.template
+
+          // TODO: move this to codegen
           finalBody = `<import src="${htmlPraserSrc}"/>${body}`
         }
 
