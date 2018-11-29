@@ -1,5 +1,6 @@
 const path = require( 'path' )
-const babel = require( 'babel-core' )
+const semver = require( 'semver' )
+const { babel } = require( '../utils/babel' )
 const extractConfigPlugin = require( '../babel-plugins/extract-config' )
 const entryComponentPlugin = require( '../babel-plugins/entry-component' )
 const resolveSource = require( '../utils/resolveSource' )
@@ -13,13 +14,15 @@ module.exports = function ( source ) {
   if ( entryHelper.isEntry( loaderContext.resourcePath ) ) {
     const entryKey = entryHelper.getEntryKey( loaderContext.resourcePath )
 
-    const ast = babel.transform( source, {
-      extends: path.resolve( process.cwd(), '.babelrc' ),
+    const babelOptions = {
+      filename: loaderContext.resourcePath,
       plugins: [
         extractConfigPlugin,
         entryComponentPlugin,
       ]
-    } )
+    }
+
+    const ast = babel.transform( source, babelOptions )
 
     const megaloConfig = ( ast.metadata.megaloConfig && ast.metadata.megaloConfig.value ) || {}
     const entryComponent = ast.metadata.megaloEntryComponent
