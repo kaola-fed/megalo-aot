@@ -8,6 +8,9 @@
     "webpack",
     "loader"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "webpack loader for regularjs",
   "main": "lib/index.js",
   "scripts": {

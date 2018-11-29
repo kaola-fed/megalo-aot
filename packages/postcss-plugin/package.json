@@ -2,6 +2,9 @@
   "name": "@megalo/postcss-plugin",
   "version": "0.0.2",
   "description": "postcss-plugin for megalo",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {},
   "author": "kaola-fed",

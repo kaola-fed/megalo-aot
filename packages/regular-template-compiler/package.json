@@ -2,6 +2,9 @@
   "name": "@megalo/regular-template-compiler",
   "version": "0.1.0",
   "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {},
   "keywords": [],
