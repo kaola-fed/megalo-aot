@@ -6,7 +6,9 @@ const createEntryHelper = require( '../utils/createEntryHelper' )
 const attach = require( '../utils/attachLoaderContext' )
 const sortEntrypointFiles = require( '../utils/sortEntrypointFiles' )
 const removeExtension = require( '../utils/removeExtension' )
-const { getPackagesRoot } = require( '../utils/subPackages' )
+const subpackagesUtil = require( '../utils/subpackages' )
+const walkObject = require( '../utils/walkObject' )
+const platforms = require( '../platforms' )
 
 const pages = {}
 const allCompilerOptions = {}
@@ -80,41 +82,12 @@ function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
     `megalo-plugin-emit`,
     compilation => {
       const { entrypoints, assets } = compilation || {}
-      const chunkFiles = sortEntrypointFiles( entrypoints, platform )
-      const subPackagesRoot = getPackagesRoot(pages) || []
-      compiler.subPackagesRoot = subPackagesRoot
-      let codegen
+      const appConfig = pages.app && pages.app.config && pages.app.config || {}
+      const subpackages = appConfig.subpackages || appConfig.subPackages || []
+      const { codegen } = platforms[ platform ]
 
-      const pagesWithFiles = []
-      Object.keys( pages ).map( k => {
-        const page = pages[ k ] || {}
-        const files = chunkFiles[ k ]
-        const root = subPackagesRoot[ k ] || '.'
-        // reset assets
-        if(root !== '.'){
-          const regReg = new RegExp(`^(./)?([^\\s\\.]*/)(${root}/)`)
-          Object.keys( assets ).map( a => {
-            if(regReg.test(a)){
-              let rename = a.replace(regReg,'$1$3$2')
-              assets[rename] = assets[a]
-              delete assets[a]
-            }
-          })
-        }
-        pagesWithFiles.push( Object.assign( {}, page, { files, root } ) )
-      } )
-
-      switch( platform ) {
-        case 'wechat':
-          codegen = require( '../platforms/wechat' ).codegen
-          break;
-        case 'alipay':
-          codegen = require( '../platforms/alipay' ).codegen
-          break;
-        case 'swan':
-          codegen = require( '../platforms/swan' ).codegen
-          break;
-      }
+      // move assets to subpackage
+      moveAssets( { assets, subpackages } )
 
       // emit files, includes:
       // 1. pages (wxml/wxss/js/json)
@@ -122,8 +95,20 @@ function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
       // 3. slots
       // 4. htmlparse
       codegen(
-        pagesWithFiles,
-        { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions },
+        normalizePages( {
+          pages,
+          assets,
+          subpackages,
+          entrypoints,
+          platform,
+        } ),
+        {
+          subpackages,
+          templates,
+          allCompilerOptions,
+          megaloTemplateCompiler,
+          megaloOptions
+        },
         {
           compiler,
           compilation,
@@ -131,6 +116,63 @@ function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
       )
     }
   )
+}
+
+function normalizePages( { pages, assets, subpackages, entrypoints, platform } ) {
+  const chunkFiles = sortEntrypointFiles( entrypoints, platform )
+  const normalized = []
+
+  Object.keys( pages ).map( k => {
+    const page = pages[ k ] || {}
+    const subpackage = subpackagesUtil.findSubpackage( page.file, subpackages )
+    // prefix root for subpackage files
+    const files = normalizeFiles( {
+      files: chunkFiles[ k ],
+      subpackage,
+      assets, // ensure resource is emitted in assets
+    } )
+
+    // add chunk files for pages
+    const newPage = Object.assign( {}, page, { files } )
+
+    // subpackage should prefix root
+    if ( subpackage ) {
+      page.entryComponent.root = subpackage.root
+    } else {
+      page.entryComponent.root = ''
+    }
+
+    normalized.push( newPage )
+  } )
+
+  return normalized
+}
+
+function normalizeFiles( { files, subpackage, assets } ) {
+  const root = subpackage ? subpackage.root + '/' : ''
+
+  walkObject( files, ( file, key, parent ) => {
+    if ( typeof file === 'string' ) {
+      const renamed = root + file
+
+      // exists
+      if ( subpackage && assets[ renamed ] ) {
+        parent[ key ] = renamed
+      }
+    }
+  } )
+
+  return files
+}
+
+function moveAssets( { assets = {}, subpackages = [] } ) {
+  Object.keys( assets ).map( path => {
+    const subpackage = subpackagesUtil.findSubpackage( path, subpackages )
+    if ( subpackage ) {
+      assets[ subpackage.root + '/' + path ] = assets[ path ]
+      delete assets[ path ]
+    }
+  } )
 }
 
 function attachEntryHelper( compiler ) {

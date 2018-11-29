@@ -1,0 +1,21 @@
+<template>
+  <div class="container">hello world</div>
+  <Child></Child>
+</template>
+
+<script>
+  import Child from './Child'
+
+  export default {
+    components: {
+      Child,
+    },
+    mpType: 'page',
+  }
+</script>
+
+<style lang="less" scoped>
+  .container {
+    color: blue;
+  }
+</style>

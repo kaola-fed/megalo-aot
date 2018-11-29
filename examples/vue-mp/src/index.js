@@ -17,6 +17,15 @@ export default {
     pages: [
       'pages/counter/index',
       'pages/todomvc/index',
+    ],
+
+    subpackages: [
+      {
+        root: 'package',
+        pages: [
+          'pages/demo/index'
+        ]
+      }
     ]
   }
 }

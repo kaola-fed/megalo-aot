@@ -8,19 +8,12 @@ if (!my.__megalo) {
 }
 `
 
-module.exports = function ( { file, files = {}, root } = {} ) {
+module.exports = function ( { file, files = {} } = {} ) {
   const split = files.split.js || []
   const main = files.main.js || []
-  const rootReg = root!== '.' ? RegExp(`(^|.*/)${root}/(pages/)`) : null,
-        isSubPackage = !!rootReg && rootReg.test(file),
-        _file = isSubPackage ? file.replace( rootReg, '$1$2') : file
-
   const res = split
     .concat( main )
-    .map( j => {
-      const isSubSource = !!rootReg && rootReg.test(j)
-      return `require('${ relativeToRoot( isSubSource ? _file : file ) }${ isSubPackage && isSubSource ? j.replace( rootReg, '$1$2') : j}')`
-    })
+    .map( j => `require('${ relativeToRoot( file ) }${ j }')` )
   
   res.unshift(fixGlobalSnippet)
   return res.join( '\n' )

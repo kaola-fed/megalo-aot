@@ -1,32 +1,36 @@
 const emitFile = require( '../../utils/emitFile' )
 const relativeToRoot = require( './utils/relativeToRoot' )
 const getMD5 = require( '../../utils/md5' )
+const constants = require( './constants' )
+const subpackagesUtil = require( '../../utils/subpackages' )
 
 const compiledComponentTemplates = {}
 
-module.exports = function({
+module.exports = function( {
   generators,
-  component,
-  slots,
-  constants
+  extensions,
 } ) {
   return function(
     pages = [],
-    { templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions } = {},
+    { subpackages, templates, allCompilerOptions, megaloTemplateCompiler, megaloOptions } = {},
     { compiler, compilation } = {}
   ) {
     const { htmlParse = false, platform } = megaloOptions
-    const { subPackagesRoot } = compiler
 
     // emit page stuff
     pages.forEach( options => {
       const { file } = options
-      const generatorOptions = Object.assign({ htmlParse }, options)
+      const generatorOptions = normalizeGeneratorOptions(
+        Object.assign( {}, options, { htmlParse } ),
+        { constants, extensions }
+      )
 
-      generators.forEach( pair => {
-        const generate = pair[ 0 ]
-        const extension = pair[ 1 ]
-        emitFile( `${ file }${ extension }`, generate( generatorOptions ), compilation )
+      ;[ 'json', 'script', 'style', 'template' ].forEach( type => {
+        emitFile(
+          `${ file }${ extensions[ type ] }`,
+          generators[ type ]( generatorOptions ),
+          compilation
+        )
       } )
     } )
 
@@ -36,37 +40,28 @@ module.exports = function({
     // emit components
     Object.keys( templates ).forEach( resourcePath => {
       const source = templates[ resourcePath ]
-      const opts = allCompilerOptions[ resourcePath ] || {}
-      let page = pages.find(p=>opts.name === p.entryComponent)
+      const compilerOptions = allCompilerOptions[ resourcePath ] || {}
 
-      // get page root
-      if ( !page ){
-        for(let i in subPackagesRoot){
-          let root = subPackagesRoot[i]
-          if( RegExp(`src/${root}/`).test(resourcePath) ){
-            page = { root }
-            break
-          }
-        }
-      }
-      const { root = '.'} = page || {}
-      const COMPONENT_OUTPUT_PATH = constants.COMPONENT_OUTPUT_PATH.replace( /\[root\]\//g, root == '.' ? '' : `${root}/` )
+      // is importee in subpackage ?
+      const importeeSubpackage = subpackagesUtil.findSubpackage( resourcePath, subpackages )
+      const importeeOutPath = constants.COMPONENT_OUTPUT_PATH
+        .replace( /\[name\]/g, compilerOptions.name )
+        .replace( /\[root\]/g, importeeSubpackage ? importeeSubpackage.root + '/' : '' ) +
+        extensions.template
 
-      // clone
-      const imports = Object.assign( {}, opts.imports || {} )
-      Object.keys(imports).forEach( k => {
-        const { src, resolved} = imports[ k ]
-        if ( !/\.\./.test( src ) ) {
-          Object.assign( imports[ k ], {
-            src: relativeToRoot( COMPONENT_OUTPUT_PATH ) + (root !== '.' && RegExp(`src/${root}/`).test(resolved) ? `${root}/` : '') + `components/${src}`
-          } )
-        }
+      const imports = normalizeImports( {
+        imports: compilerOptions.imports,
+        importeeOutPath,
+        extensions,
+        subpackages,
       } )
+
       // add slots
       imports[ '_slots_' ] = {
         name: '',
-        src: relativeToRoot( COMPONENT_OUTPUT_PATH ) +
-          constants.SLOTS_OUTPUT_PATH
+        src: relativeToRoot( importeeOutPath ) +
+          constants.SLOTS_OUTPUT_PATH +
+          extensions.template
       }
 
       const importsStr = Object.keys( imports ).reduce( ( res, key ) => {
@@ -77,16 +72,14 @@ module.exports = function({
       let currentSlots = []
 
       if (compiledComponentTemplate.md5 !== md5) {
-        let compilerOptions = Object.assign(
-          {},
-          allCompilerOptions[ resourcePath ],
-          { target: platform, imports, htmlParse }
-        )
-
-        const { body, slots, needHtmlParse } = component( {
+        const { body, slots, needHtmlParse } = generators.component( {
           source,
           compiler: megaloTemplateCompiler,
-          compilerOptions,
+          compilerOptions: Object.assign(
+            {},
+            compilerOptions,
+            { target: platform, imports, htmlParse }
+          ),
         } )
 
         compiledComponentTemplates[ resourcePath ] = {
@@ -98,18 +91,18 @@ module.exports = function({
         currentSlots = slots || []
 
         let finalBody = body
-        const name = compilerOptions.name
 
         if (htmlParse && needHtmlParse) {
           // add htmlparse
-          const htmlPraserSrc = relativeToRoot( COMPONENT_OUTPUT_PATH ) +
-              constants.HTMLPARSE_OUTPUT_PATH.TEMPLATE
+          const htmlPraserSrc = relativeToRoot( importeeOutPath ) +
+            constants.HTMLPARSE_TEMPLATE_OUTPUT_PATH +
+            extensions.template
           finalBody = `<import src="${htmlPraserSrc}"/>${body}`
         }
 
         // emit component
         emitFile(
-          COMPONENT_OUTPUT_PATH.replace( /\[name\]/g, name ),
+          importeeOutPath,
           finalBody,
           compilation
         )
@@ -128,12 +121,50 @@ module.exports = function({
 
     // slots
     emitFile(
-      constants.SLOTS_OUTPUT_PATH,
-      slots( {
+      constants.SLOTS_OUTPUT_PATH + extensions.template,
+      generators.slots( {
         imports: allSlotImports,
         bodies: allSlotContent,
       } ),
       compilation
     )
   }
+}
+
+function normalizeGeneratorOptions( options, { constants, extensions } ) {
+  const entryComponent = options.entryComponent || {}
+
+  // resolve entryComponent src
+  entryComponent.src = constants.COMPONENT_OUTPUT_PATH
+    .replace( /\[root\]/g, entryComponent.root ? entryComponent.root + '/' : '' )
+    .replace( /\[name\]/g, entryComponent.name ) +
+    extensions.template
+
+  return options
+}
+
+function normalizeImports( {
+  imports = {},
+  importeeOutPath,
+  extensions = {},
+  subpackages = []
+} ) {
+  imports = Object.assign( {}, imports )
+
+  Object.keys( imports ).forEach( k => {
+    const { name, resolved } = imports[ k ]
+
+    const subpackage = subpackagesUtil.findSubpackage( resolved, subpackages )
+    const root = subpackage ? subpackage.root : ''
+
+    const src = relativeToRoot( importeeOutPath ) +
+      constants.COMPONENT_OUTPUT_PATH
+        .replace( /\[root\]/g, root + '/' )
+        .replace( /\[name\]/g, name ) +
+      extensions.template
+
+    imports[ k ].src = src
+  } )
+
+  return imports
 }

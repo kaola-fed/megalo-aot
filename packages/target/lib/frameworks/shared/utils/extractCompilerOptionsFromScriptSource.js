@@ -28,7 +28,6 @@ module.exports = function( source, loaderContext ) {
           const hashed = hashify( resolved )
           tmp[ key ] = {
             name: hashed,
-            src: hashed,
             resolved
           }
         } )
