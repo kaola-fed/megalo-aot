@@ -4,7 +4,7 @@
   "scripts": {
     "boot": "lerna bootstrap",
     "clean": "lerna clean",
-    "publish": "lerna publish --independent"
+    "publish": "lerna publish"
   },
   "devDependencies": {
     "lerna": "^3.0.0-rc.0"
