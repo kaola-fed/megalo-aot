@@ -1,10 +1,9 @@
 {
   "name": "@megalo/postcss-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "postcss-plugin for megalo",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "author": "kaola-fed",
   "license": "MIT",
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@megalo/regular-loader",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "keywords": [
     "regularjs",
     "regular",
@@ -45,12 +45,12 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@megalo/regular-template-compiler": "^0.1.0",
     "@vue/component-compiler-utils": "^2.3.0",
     "hash-sum": "^1.0.2",
     "html-minifier": "^3.5.6",
     "loader-utils": "^1.1.0",
-    "lru-cache": "^4.0.1",
-    "@megalo/regular-template-compiler": "^0.0.0"
+    "lru-cache": "^4.0.1"
   },
   "peerDependencies": {
     "regularjs": "*"

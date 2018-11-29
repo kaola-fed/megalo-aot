@@ -1,6 +1,6 @@
 {
   "name": "regular-web",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "private": true,
@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@megalo/regular-loader": "*",
+    "@megalo/regular-loader": "^0.1.0",
     "babel-core": "6",
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
