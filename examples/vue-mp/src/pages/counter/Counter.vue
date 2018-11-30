@@ -15,8 +15,6 @@ import A from './A.vue'
 import B from './B.vue'
 
 export default {
-  mpType: 'page',
-
   components: {
     'abc': A,
     B,

@@ -3,6 +3,7 @@ const semver = require( 'semver' )
 const { babel } = require( '../utils/babel' )
 const extractConfigPlugin = require( '../babel-plugins/extract-config' )
 const entryComponentPlugin = require( '../babel-plugins/entry-component' )
+const mpTypePagePlugin = require( '../babel-plugins/mptype' )
 const resolveSource = require( '../utils/resolveSource' )
 const hashify = require( '../utils/hashify' )
 
@@ -10,6 +11,7 @@ module.exports = function ( source ) {
   const loaderContext = this
   const entryHelper = loaderContext.megaloEntryHelper
   const callback = loaderContext.async()
+  let sourcemap = null
 
   if ( entryHelper.isEntry( loaderContext.resourcePath ) ) {
     const entryKey = entryHelper.getEntryKey( loaderContext.resourcePath )
@@ -19,13 +21,18 @@ module.exports = function ( source ) {
       plugins: [
         extractConfigPlugin,
         entryComponentPlugin,
-      ]
+      ].concat(
+        entryKey === 'app' ? [] : [ mpTypePagePlugin ]
+      )
     }
 
-    const ast = babel.transform( source, babelOptions )
+    const { code, map, metadata } = babel.transform( source, babelOptions )
 
-    const megaloConfig = ( ast.metadata.megaloConfig && ast.metadata.megaloConfig.value ) || {}
-    const entryComponent = ast.metadata.megaloEntryComponent
+    source = code
+    sourcemap = map
+
+    const megaloConfig = ( metadata.megaloConfig && metadata.megaloConfig.value ) || {}
+    const entryComponent = metadata.megaloEntryComponent
 
     if ( !entryComponent ) {
       callback( new Error( 'Cannot resolve entry component for ' + entryKey ) )
@@ -42,11 +49,11 @@ module.exports = function ( source ) {
           },
         } )
 
-        callback( null, source )
+        callback( null, source, sourcemap )
       }, e => {
-        callback( e )
+        callback( e, source, sourcemap )
       } )
   } else {
-    callback( null, source )
+    callback( null, source, sourcemap )
   }
 }

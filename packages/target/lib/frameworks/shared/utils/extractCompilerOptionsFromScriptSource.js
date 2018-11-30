@@ -14,9 +14,9 @@ module.exports = function( source, loaderContext ) {
     ]
   }
 
-  const ast = babel.transform( source, babelOptions )
+  const { metadata } = babel.transform( source, babelOptions )
 
-  const components = ast.metadata.megaloComponents || {}
+  const components = ( metadata && metadata.megaloComponents ) || {}
 
   const tmp = {}
 

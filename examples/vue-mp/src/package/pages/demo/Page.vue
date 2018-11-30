@@ -11,7 +11,6 @@
   import Child from './Child'
 
   export default {
-    mpType: 'page',
     components: {
       Child,
     },
