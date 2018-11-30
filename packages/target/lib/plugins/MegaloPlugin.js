@@ -168,9 +168,13 @@ function normalizeFiles( { files, subpackage, assets } ) {
 function moveAssets( { assets = {}, subpackages = [] } ) {
   Object.keys( assets ).map( path => {
     const subpackage = subpackagesUtil.findSubpackage( path, subpackages )
+
     if ( subpackage ) {
-      assets[ subpackage.root + '/' + path ] = assets[ path ]
-      delete assets[ path ]
+      const inSubpackage = path.indexOf( subpackage.root + '/' ) === 0
+      if ( !inSubpackage ) {
+        assets[ subpackage.root + '/' + path ] = assets[ path ]
+        delete assets[ path ]
+      }
     }
   } )
 }
