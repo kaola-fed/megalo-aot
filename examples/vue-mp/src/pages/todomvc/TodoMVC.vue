@@ -8,8 +8,6 @@
 
 <script>
 export default {
-  mpType: 'page',
-
   created() {
     console.log( 'created' )
   },
