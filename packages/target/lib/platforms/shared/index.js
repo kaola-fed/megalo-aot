@@ -44,7 +44,7 @@ module.exports = function( {
 
     // emit components
     Object.keys( templates ).forEach( resourcePath => {
-      const source = templates[ resourcePath ]
+      const { source, useCompiler } = templates[ resourcePath ]
       const compilerOptions = allCompilerOptions[ resourcePath ] || {}
 
       // is importee in subpackage ?
@@ -77,9 +77,12 @@ module.exports = function( {
       let currentSlots = []
 
       if (compiledComponentTemplate.md5 !== md5) {
+        let compiler = megaloTemplateCompiler[ useCompiler ] ||
+          megaloTemplateCompiler.vue
+
         const { body, slots, needHtmlParse } = generators.component( {
           source,
-          compiler: megaloTemplateCompiler,
+          compiler,
           compilerOptions: Object.assign(
             {},
             compilerOptions,

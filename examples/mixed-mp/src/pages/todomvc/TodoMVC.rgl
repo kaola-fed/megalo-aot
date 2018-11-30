@@ -1,0 +1,44 @@
+<template>
+  <div class="app">
+    <button on-click="{ this.onMinus() }">-</button>
+    { counter }
+    <button on-click="{ this.onPlus() }">+</button>
+  </div>
+</template>
+
+<script>
+export default {
+  mpType: 'page',
+
+  components: {
+  },
+
+  config() {
+    this.data.counter = 0
+  },
+
+  onMinus() {
+    this.data.counter = this.data.counter - 1
+  },
+
+  onPlus() {
+    this.data.counter = this.data.counter + 1
+  },
+}
+</script>
+
+<style lang="less" scoped>
+  .app {
+    font-size: 29px;
+  }
+
+  .app .foo {
+    color: blue;
+  }
+</style>
+
+<style lang="css" scoped>
+  .app1 {
+    font-size: 29px;
+  }
+</style>

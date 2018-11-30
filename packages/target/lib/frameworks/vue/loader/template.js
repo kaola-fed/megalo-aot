@@ -40,7 +40,10 @@ module.exports = function (source) {
   )
   loaderContext.megaloCacheToTemplates(
     realResourcePath,
-    source
+    {
+      source,
+      useCompiler: 'vue',
+    }
   )
 
   // for vue-component-compiler

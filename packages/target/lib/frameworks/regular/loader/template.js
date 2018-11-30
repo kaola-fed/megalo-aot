@@ -48,7 +48,10 @@ module.exports = function (data) {
 
   loaderContext.megaloCacheToTemplates(
     realResourcePath,
-    source
+    {
+      source,
+      useCompiler: 'regular',
+    }
   )
 
   extractCompilerOptionsFromScriptSource( scriptSource, loaderContext )
