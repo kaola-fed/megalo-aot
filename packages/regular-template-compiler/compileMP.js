@@ -1,6 +1,7 @@
 const Regular = require( 'regularjs' )
 const htmlMinifier = require( 'html-minifier' )
 const compileToTemplate = require( './lib' )
+const loaderUtils = require( 'loader-utils' )
 
 module.exports = function( source = {}, options = {} ) {
   const { scopeId } = options
