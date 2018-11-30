@@ -1,6 +1,7 @@
 const path = require( 'path' )
 const webpack = require( 'webpack' )
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' )
+const normalizeCompiler = require( './utils/normalizeCompiler' )
 
 const exts = {
   wechat: {
@@ -18,6 +19,8 @@ const exts = {
 }
 
 function createMegaloTarget( options = {} ) {
+  options = normalizeOptions( options )
+
   const { platform = 'wechat', htmlParse } = options
 
   const FrameworkPlugins = [
@@ -39,7 +42,7 @@ function createMegaloTarget( options = {} ) {
     new MegaloPlugin( options ).apply( compiler )
     FrameworkPlugins.forEach( Plugin => new Plugin( options ).apply( compiler ) )
 
-    const { xml, css } = exts[platform] || exts.wechat;
+    const { xml, css } = exts[ platform ] || exts.wechat
 
     if (htmlParse) {
       new CopyWebpackPlugin([
@@ -54,6 +57,12 @@ function createMegaloTarget( options = {} ) {
       ]).apply( compiler )
     }
   }
+}
+
+function normalizeOptions( options = {} ) {
+  return Object.assign( {}, options, {
+    compiler: normalizeCompiler( options.compiler || {} )
+  } )
 }
 
 module.exports = createMegaloTarget

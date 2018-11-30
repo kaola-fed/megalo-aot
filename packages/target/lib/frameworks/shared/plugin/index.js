@@ -55,6 +55,7 @@ function replaceTemplateCompiler( { rules, compiler, files = [], frameworkLoader
   const useLoader = use[ useLoaderIndex ]
 
   // override compiler for `[framework]-loader` and `./loader/[framework]`
+  useLoader.options = useLoader.options || {}
   useLoader.options.compiler = compiler
 }
 

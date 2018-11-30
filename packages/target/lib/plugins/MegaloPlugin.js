@@ -24,8 +24,7 @@ class MegaloPlugin {
     const rawRules = compilerOptions.module.rules
     const { rules } = new RuleSet( rawRules )
     const megaloOptions = this.options
-    const megaloTemplateCompiler = megaloOptions.compiler ||
-      require( '@megalo/template-compiler' )
+    const megaloTemplateCompiler = megaloOptions.compiler
 
     // replace globalObject
     replaceGlobalObject( compiler, megaloOptions )
