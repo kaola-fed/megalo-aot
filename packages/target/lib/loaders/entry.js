@@ -3,7 +3,7 @@ const semver = require( 'semver' )
 const { babel } = require( '../utils/babel' )
 const extractConfigPlugin = require( '../babel-plugins/extract-config' )
 const entryComponentPlugin = require( '../babel-plugins/entry-component' )
-const mpTypePagePlugin = require( '../babel-plugins/mptype' )
+const mpTypePlugin = require( '../babel-plugins/mptype' )
 const resolveSource = require( '../utils/resolveSource' )
 const hashify = require( '../utils/hashify' )
 
@@ -21,9 +21,8 @@ module.exports = function ( source ) {
       plugins: [
         extractConfigPlugin,
         entryComponentPlugin,
-      ].concat(
-        entryKey === 'app' ? [] : [ mpTypePagePlugin ]
-      )
+        mpTypePlugin( entryKey === 'app' ? 'app' : 'page' )
+      ]
     }
 
     const { code, map, metadata } = babel.transform( source, babelOptions )
