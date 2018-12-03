@@ -16,7 +16,7 @@ export default {
 
     pages: [
       'pages/counter/index',
-      'pages/todomvc/index',
+      // 'pages/todomvc/index',
     ],
 
     subpackages: [

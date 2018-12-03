@@ -39,8 +39,15 @@ module.exports = function( {
       } )
     } )
 
-    const allSlotImports = new Set()
-    const allSlotContent = new Set()
+    // `components/slots.wxml`
+    const mainSlots = {
+      imports: new Set(),
+      contents: new Set(),
+    }
+
+    // `[package]/components/slots.wxml`
+    // { root1: { imports: [], contents: [] }, root2: ... }
+    const subpackageSlots = {}
 
     // emit components
     Object.keys( templates ).forEach( resourcePath => {
@@ -49,9 +56,10 @@ module.exports = function( {
 
       // is importee in subpackage ?
       const importeeSubpackage = subpackagesUtil.findSubpackage( resourcePath, subpackages )
+      const ROOT_REPLACER = importeeSubpackage ? importeeSubpackage.root + '/' : ''
       const importeeOutPath = constants.COMPONENT_OUTPUT_PATH
         .replace( /\[name\]/g, compilerOptions.name )
-        .replace( /\[root\]/g, importeeSubpackage ? importeeSubpackage.root + '/' : '' ) +
+        .replace( /\[root\]/g, importeeSubpackage ? ROOT_REPLACER : '' ) +
         extensions.template
 
       const imports = normalizeImports( {
@@ -65,7 +73,8 @@ module.exports = function( {
       imports[ '_slots_' ] = {
         name: '',
         src: relativeToRoot( importeeOutPath ) +
-          constants.SLOTS_OUTPUT_PATH +
+          constants.SLOTS_OUTPUT_PATH
+            .replace( /\[root\]/g, ROOT_REPLACER ) +
           extensions.template
       }
 
@@ -74,7 +83,16 @@ module.exports = function( {
       }, '' )
       const md5 = getMD5( source + importsStr )
       const compiledComponentTemplate = compiledComponentTemplates[ resourcePath ] || {}
+
       let currentSlots = []
+
+      // ensure subpackageSlots[ ROOT_REPLACER ]
+      if ( !subpackageSlots[ ROOT_REPLACER ] && importeeSubpackage ) {
+        subpackageSlots[ ROOT_REPLACER ] = {
+          imports: new Set(),
+          contents: new Set(),
+        }
+      }
 
       if (compiledComponentTemplate.md5 !== md5) {
         let compiler = megaloTemplateCompiler[ useCompiler ] ||
@@ -96,6 +114,7 @@ module.exports = function( {
           slots,
           needHtmlParse
         }
+
         currentSlots = slots || []
 
         let finalBody = body
@@ -121,20 +140,45 @@ module.exports = function( {
       }
 
       // collect slots
+      let collector
+      if ( importeeSubpackage ) { // in subpackage
+        collector = subpackageSlots[ ROOT_REPLACER ]
+      } else { // not in subpackage
+        collector = mainSlots
+      }
+
       currentSlots.forEach( slot => {
         const dependencies = slot.dependencies || []
         const body = slot.body
-        dependencies.forEach( d => allSlotImports.add( d ) )
-        allSlotContent.add( body )
+        dependencies.forEach( d => collector.imports.add( d ) )
+        collector.contents.add( body )
       } )
     } )
 
-    // slots
+    Object.keys( subpackageSlots )
+      .forEach( replacer => {
+        const { imports, contents } = subpackageSlots[ replacer ] || {}
+        // subpackage slots
+        emitFile(
+          constants.SLOTS_OUTPUT_PATH
+            .replace( /\[root\]/g, replacer ) +
+          extensions.template,
+          generators.slots( {
+            imports,
+            bodies: contents,
+          } ),
+          compilation
+        )
+      } )
+
+    // main slots
     emitFile(
-      constants.SLOTS_OUTPUT_PATH + extensions.template,
+      constants.SLOTS_OUTPUT_PATH
+        .replace( /\[root\]/g, '' ) +
+      extensions.template,
       generators.slots( {
-        imports: allSlotImports,
-        bodies: allSlotContent,
+        imports: mainSlots.imports,
+        bodies: mainSlots.contents,
       } ),
       compilation
     )
