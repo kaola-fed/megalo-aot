@@ -6,6 +6,8 @@ const removeExtension = require( '../../../utils/removeExtension' )
 const getMD5 = require( '../../../utils/md5' )
 const extractCompilerOptionsFromScriptSource =
   require( '../../shared/utils/extractCompilerOptionsFromScriptSource' )
+const extractComponentsPlugin = require( '../babel-plugins/extract-components' )
+
 
 // Loader that compiles raw template into JavaScript functions.
 // This is injected by the global pitcher (../pitch) for template
@@ -54,7 +56,7 @@ module.exports = function (data) {
     }
   )
 
-  extractCompilerOptionsFromScriptSource( scriptSource, loaderContext )
+  extractCompilerOptionsFromScriptSource( scriptSource, extractComponentsPlugin, loaderContext )
     .then( compilerOptions => {
       loaderContext.megaloCacheToAllCompilerOptions(
         realResourcePath,

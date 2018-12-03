@@ -4,6 +4,7 @@ const extractCompilerOptionsFromScriptSource =
 const extractPageFromScriptSource =
   require( '../../shared/utils/extractPageFromScriptSource' )
 const removeExtension = require( '../../../utils/removeExtension' )
+const extractComponentsPlugin = require( '../babel-plugins/extract-components' )
 
 module.exports = function ( source ) {
   const loaderContext = this
@@ -11,7 +12,7 @@ module.exports = function ( source ) {
   const realResourcePath = removeExtension( loaderContext.resourcePath, '.js' )
 
   const jobs = [
-    extractCompilerOptionsFromScriptSource( source, loaderContext ),
+    extractCompilerOptionsFromScriptSource( source, extractComponentsPlugin, loaderContext ),
     extractPageFromScriptSource( source, loaderContext ),
   ]
 

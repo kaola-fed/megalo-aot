@@ -1,12 +1,11 @@
 const path = require( 'path' )
 const semver = require( 'semver' )
 const { babel } = require( '../../../utils/babel' )
-const extractComponentsPlugin = require( '../../../babel-plugins/extract-components' )
 const resolveSource = require( '../../../utils/resolveSource' )
 const hashify = require( '../../../utils/hashify' )
 const removeExtension = require( '../../../utils/removeExtension' )
 
-module.exports = function( source, loaderContext ) {
+module.exports = function( source, extractComponentsPlugin, loaderContext ) {
   const babelOptions = {
     filename: loaderContext.resourcePath,
     plugins: [
