@@ -1,5 +1,4 @@
 const path = require( 'path' )
-const semver = require( 'semver' )
 const { babel } = require( '../utils/babel' )
 const extractConfigPlugin = require( '../babel-plugins/extract-config' )
 const entryComponentPlugin = require( '../babel-plugins/entry-component' )

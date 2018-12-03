@@ -30,12 +30,12 @@ class MegaloPlugin {
     replaceGlobalObject( compiler, megaloOptions )
 
     // generate pages
-    hookEntry( {
+    hookJSEntry( {
       rules,
       files: [ 'foo.js', 'foo.ts' ],
       entryLoader: {
         options: {},
-        loader: require.resolve( '../loaders/entry' ),
+        loader: require.resolve( '../loaders/js-entry' ),
       },
     } )
 
@@ -59,7 +59,7 @@ function replaceGlobalObject( compiler, megaloOptions ) {
 }
 
 // [framework]-loader clones babel-loader rule, we shall ignore it
-function hookEntry( { rules, files = {}, entryLoader } ) {
+function hookJSEntry( { rules, files = {}, entryLoader } ) {
   const entryRule = findRuleByFile( rules, files )
 
   if ( !entryRule ) {
@@ -196,7 +196,22 @@ function attachCacheAPI( compiler ) {
 
 // sideEffects: true
 function cacheToPages( { file, config, entryComponent } = {} ) {
-  pages[ file ] = { file, config, entryComponent }
+  if ( !pages[ file ] ) {
+    pages[ file ] = {}
+  }
+
+  if ( file ) {
+    pages[ file ].file = file
+  }
+
+  // merge config
+  if ( config ) {
+    pages[ file ].config = Object.assign( {}, pages[ file ].config || {}, config )
+  }
+
+  if ( entryComponent ) {
+    pages[ file ].entryComponent = entryComponent
+  }
 }
 
 function cacheToAllCompilerOptions( resourcePath, compilerOptions = {} ) {

@@ -15,6 +15,7 @@ class VuePlugin {
         frameworkLoaderRegexp: /^vue-loader|(\/|\\|@)vue-loader/,
         pitcherLoader: require.resolve( '../loader/pitcher' ),
         compiler: options.compiler.vue,
+        entryLoader: require.resolve( '../loader/vue-entry' )
       } )
     ).apply( compiler )
   }

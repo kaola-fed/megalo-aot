@@ -56,3 +56,9 @@ export default {
     font-size: 29px;
   }
 </style>
+
+<config>
+  {
+    "a": 1
+  }
+</config>

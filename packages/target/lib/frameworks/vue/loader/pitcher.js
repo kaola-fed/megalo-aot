@@ -2,9 +2,11 @@ const qs = require( 'querystring' )
 const loaderUtils = require( 'loader-utils' )
 const hash = require( 'hash-sum' )
 const selfPath = require.resolve( 'vue-loader' )
+const vueEntryPath = require.resolve( './vue-entry' )
 const styleLoaderPath = require.resolve( './style' )
 const templateLoaderPath = require.resolve( './template' )
 const scriptLoaderPath = require.resolve( './script' )
+const configLoaderPath = require.resolve( './config' )
 
 const isESLintLoader = l => /(\/|\\|@)eslint-loader/.test(l.path)
 const isNullLoader = l => /(\/|\\|@)null-loader/.test(l.path)
@@ -53,6 +55,8 @@ module.exports.pitch = function (remainingRequest) {
 
   // remove self
   loaders = loaders.filter(isPitcher)
+  // remove vue entry loader
+  loaders = loaders.filter( l => l.path !== vueEntryPath )
 
   // do not inject if user uses null-loader to void the type (#1239)
   if (loaders.some(isNullLoader)) {
@@ -138,6 +142,19 @@ module.exports.pitch = function (remainingRequest) {
       // console.log(request)
       return `import mod from ${request}; export default mod; export * from ${request}`
     }
+  }
+
+  // handle config block
+  if (
+    query.type === 'custom' &&
+    query.blockType === 'config'
+  ) {
+    const vueLoader = loaders.find( l => l.path = selfPath )
+    const request = genRequest( [
+      configLoaderPath,
+    ].concat( vueLoader ? [ vueLoader ] : [] ) )
+
+    return `import mod from ${request}; export default mod; export * from ${request}`
   }
 
   // if a custom block has no other matching loader other than vue-loader itself,

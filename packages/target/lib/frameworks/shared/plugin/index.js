@@ -18,8 +18,21 @@ class FrameworkPlugin {
       frameworkLoaderRegexp,
       compiler: templateCompiler,
       entryLoader,
-      pitcherLoader
+      pitcherLoader,
     } = this.options || {}
+
+    // .[framework] maybe used as entry
+    if ( entryLoader ) {
+      hookFrameworkEntry( {
+        rules,
+        files: sfcFiles,
+        frameworkLoaderRegexp,
+        entryLoader: {
+          options: {},
+          loader: entryLoader,
+        },
+      } )
+    }
 
     // generate components
     replaceTemplateCompiler( {
@@ -38,6 +51,21 @@ class FrameworkPlugin {
 
     compiler.options.module.rules = rules
   }
+}
+
+function hookFrameworkEntry( { rules, files = {}, frameworkLoaderRegexp, entryLoader } ) {
+  const entryRule = findRuleByFile( rules, files )
+
+  if ( !entryRule ) {
+    return
+  }
+
+  const entryUse = entryRule.use
+  const vueUseLoaderIndex = entryUse.findIndex( u => {
+    return frameworkLoaderRegexp.test( u.loader )
+  } )
+
+  entryUse.splice( vueUseLoaderIndex, 0, entryLoader )
 }
 
 // add our loader before [framework]-loader
