@@ -149,9 +149,11 @@ module.exports.pitch = function (remainingRequest) {
     query.type === 'custom' &&
     query.blockType === 'config'
   ) {
+    const vueLoader = loaders.find( l => l.path = selfPath )
     const request = genRequest( [
       configLoaderPath,
-    ] )
+    ].concat( vueLoader ? [ vueLoader ] : [] ) )
+
     return `import mod from ${request}; export default mod; export * from ${request}`
   }
 
