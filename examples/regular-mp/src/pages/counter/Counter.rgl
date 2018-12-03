@@ -6,17 +6,21 @@
     <abc>
       slot test
     </abc>
+    <cde></cde>
   </div>
 </template>
 
 <script>
 import A from './A'
+import B from './B'
+
 
 export default {
   mpType: 'page',
 
   components: {
     'abc': A,
+    'cde': B,
   },
 
   config() {

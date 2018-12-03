@@ -1,0 +1,19 @@
+<template>
+  B
+  <Child></Child>
+</template>
+
+<script>
+  import Regular from 'regularjs'
+  import Child from './Child'
+
+  const B = Regular.extend( {
+    config() {
+      console.log( 'B config' )
+    }
+  } )
+
+  B.component( 'Child', Child )
+
+  export default B
+</script>

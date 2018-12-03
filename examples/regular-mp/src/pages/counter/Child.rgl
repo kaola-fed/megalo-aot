@@ -1,0 +1,9 @@
+<template>
+  Child
+</template>
+
+<script>
+  export default {
+    
+  }
+</script>
