@@ -1,10 +1,19 @@
 const path = require( 'path' )
+const hash = require( 'hash-sum' )
+
+const _caches = {}
 
 function findSubpackage( filepath, subpackages ) {
+  const cacheKey = hash( { filepath, subpackages } )
+
+  if ( _caches[ cacheKey ] ) {
+    return _caches[ cacheKey ]
+  }
+
   // fix windows path
   filepath = filepath.replace( /\\/g, '/' )
 
-  return subpackages.find( pkg => {
+  const found = subpackages.find( pkg => {
     const root = pkg.root || ''
     const pages = pkg.pages || []
     const fullpaths = pages.map( page => {
@@ -22,6 +31,14 @@ function findSubpackage( filepath, subpackages ) {
       return true
     }
   } )
+
+  _caches[ cacheKey ] = found
+
+  return found
 }
 
-module.exports = { findSubpackage }
+function inSubpackage( filepath, subpackages ) {
+  return !!findSubpackage( filepath, subpackages )
+}
+
+module.exports = { findSubpackage, inSubpackage }
