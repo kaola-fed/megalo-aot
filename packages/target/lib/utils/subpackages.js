@@ -1,6 +1,9 @@
 const path = require( 'path' )
 
 function findSubpackage( filepath, subpackages ) {
+  // fix windows path
+  filepath = filepath.replace( /\\/g, '/' )
+
   return subpackages.find( pkg => {
     const root = pkg.root || ''
     const pages = pkg.pages || []
