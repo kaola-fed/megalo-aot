@@ -12,6 +12,10 @@
   "scripts": {},
   "keywords": [],
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kaola-fed/megalo-aot/tree/master/packages/target"
+  },
   "license": "MIT",
   "dependencies": {
     "@megalo/regular-template-compiler": "^0.1.0",

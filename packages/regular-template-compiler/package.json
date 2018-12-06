@@ -9,6 +9,10 @@
   "scripts": {},
   "keywords": [],
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kaola-fed/megalo-aot/tree/master/packages/regular-template-compiler"
+  },
   "license": "MIT",
   "dependencies": {
     "html-minifier": "^3.5.21",
