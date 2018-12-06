@@ -4,7 +4,7 @@ const {
   convertPageConfig
 } = require( '../convert-config' )
 
-module.exports = function ( { config, file } ) {
+module.exports = function ( { config = {}, file } ) {
   const _config = composePlatformConfig( config, 'alipay' )
   let converted = {}
   if (file === 'app') {
