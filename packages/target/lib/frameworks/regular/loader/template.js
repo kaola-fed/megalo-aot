@@ -39,31 +39,30 @@ module.exports = function (data) {
     comments: query.comments,
   })
 
-  loaderContext.megaloCacheToAllCompilerOptions(
-    realResourcePath,
-    Object.assign( {}, compilerOptions, {
-      realResourcePath,
-      target,
-      md5,
-    } )
-  )
-
-  loaderContext.megaloCacheToTemplates(
-    realResourcePath,
-    {
-      source,
-      useCompiler: 'regular',
-    }
-  )
-
   extractCompilerOptionsFromScriptSource( scriptSource, extractComponentsPlugin, loaderContext )
-    .then( compilerOptions => {
+    .then( cOptions => {
       loaderContext.megaloCacheToAllCompilerOptions(
         realResourcePath,
-        compilerOptions,
+        Object.assign( {}, compilerOptions, {
+          realResourcePath,
+          target,
+          md5,
+        }, cOptions )
       )
 
-      const compiled = compiler.compileMP(source, compilerOptions)
+      loaderContext.megaloCacheToTemplates(
+        realResourcePath,
+        {
+          source,
+          useCompiler: 'regular',
+        }
+      )
+
+      const compiled = compiler.compileMP( source, Object.assign(
+        {},
+        compilerOptions,
+        cOptions,
+      ) )
 
       // tips
       if (compiled.tips && compiled.tips.length) {
@@ -86,6 +85,9 @@ module.exports = function (data) {
       // finish with ESM exports
 
       callback( null, code + `\nexport { template, expressions }` )
+    } )
+    .catch( e => {
+      callback( e )
     } )
 }
 
