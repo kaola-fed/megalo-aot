@@ -4,13 +4,18 @@ const createMegaloTarget = require( '@megalo/target' )
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' )
 const compiler = require( '@megalo/template-compiler' )
 
-module.exports = {
+const octoparseSrc = path.resolve( path.dirname( require.resolve( `octoparse` ) ), 'lib/platform/wechat' )
 
+module.exports = {
   mode: 'development',
 
   target: createMegaloTarget( {
     compiler: compiler,
     platform: 'wechat',
+    htmlParse: {
+      templateName: 'octoParse',
+      src: octoparseSrc
+    }
   } ),
 
   entry: {

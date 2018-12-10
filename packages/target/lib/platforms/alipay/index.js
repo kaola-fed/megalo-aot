@@ -7,6 +7,13 @@ const slots = require( './codegen/slots' )
 
 const createCodegenFn = require('../shared')
 
+const extensions = {
+  json: '.json',
+  script: '.js',
+  style: '.acss',
+  template: '.axml',
+}
+
 exports.codegen = createCodegenFn( {
   generators: {
     json,
@@ -16,10 +23,7 @@ exports.codegen = createCodegenFn( {
     component,
     slots,
   },
-  extensions: {
-    json: '.json',
-    script: '.js',
-    style: '.acss',
-    template: '.axml',
-  },
+  extensions
 } )
+
+exports.extensions = extensions

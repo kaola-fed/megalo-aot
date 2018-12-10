@@ -1,3 +1,5 @@
+const path = require( 'path' )
+const JSON5 = require( 'json5' )
 const toString = Object.prototype.toString
 
 module.exports = function ( source ) {
@@ -10,12 +12,24 @@ module.exports = function ( source ) {
 
     let config
     try {
-      config = JSON.parse( source )
+      config = JSON5.parse( source )
       if ( toString.call( config ) !== '[object Object]' ) {
         config = {}
       }
     } catch ( e ) {
       config = {}
+
+      const relativePath = path.relative( process.cwd(), loaderContext.resourcePath )
+      const reason = `
+[@MEGALO/TARGET] Failed to parse <config> block in ${ relativePath },
+
+<config>
+${ source.trim() }
+</config>
+`
+      loaderContext.emitError(
+        new Error( reason )
+      )
     }
 
     loaderContext.megaloCacheToPages( {
