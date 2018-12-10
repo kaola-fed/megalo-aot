@@ -3,12 +3,21 @@ const loaderUtils = require( 'loader-utils' )
 const { compileTemplate } = require('@vue/component-compiler-utils')
 const removeExtension = require( '../../../utils/removeExtension' )
 const getMD5 = require( '../../../utils/md5' )
+const extractCompilerOptionsFromScriptSource =
+  require( '../../shared/utils/extractCompilerOptionsFromScriptSource' )
+const extractPageFromScriptSource =
+  require( '../../shared/utils/extractPageFromScriptSource' )
+const extractComponentsPlugin = require( '../babel-plugins/extract-components' )
 
 // Loader that compiles raw template into JavaScript functions.
 // This is injected by the global pitcher (../pitch) for template
 // selection requests initiated from vue files.
-module.exports = function (source) {
+module.exports = function ( data ) {
+  const source = data.template.content
+  const scriptSource = data.script.content
+
   const loaderContext = this
+  const callback = loaderContext.async()
   const query = qs.parse(this.resourceQuery.slice(1))
 
   // although this is not the main vue-loader, we can get access to the same
@@ -29,59 +38,85 @@ module.exports = function (source) {
   const compilerOptions = Object.assign({}, options.compilerOptions, {
     scopeId: query.scoped ? `v-${id}` : null,
     comments: query.comments,
+    transformAssetUrls: options.transformAssetUrls || {
+      video: ['src', 'poster'],
+      source: 'src',
+      img: 'src',
+      image: 'xlink:href'
+    },
     realResourcePath,
     target,
     md5
   })
 
-  loaderContext.megaloCacheToAllCompilerOptions(
-    realResourcePath,
-    compilerOptions
-  )
-  loaderContext.megaloCacheToTemplates(
-    realResourcePath,
-    {
-      source,
-      useCompiler: 'vue',
-    }
-  )
+  const jobs = [
+    extractCompilerOptionsFromScriptSource( scriptSource, extractComponentsPlugin, loaderContext ),
+    extractPageFromScriptSource( scriptSource, loaderContext ),
+  ]
 
-  // for vue-component-compiler
-  const finalOptions = {
-    source,
-    filename: this.resourcePath,
-    compiler,
-    compilerOptions,
-    // allow customizing behavior of vue-template-es2015-compiler
-    transpileOptions: options.transpileOptions,
-    transformAssetUrls: options.transformAssetUrls || true,
-    isProduction,
-    isFunctional,
-    optimizeSSR: false
-  }
+  Promise.all( jobs )
+    .then( data => {
+      const [ cOptions, page ] = data || []
 
-  const compiled = compileTemplate(finalOptions)
+      loaderContext.megaloCacheToAllCompilerOptions(
+        realResourcePath,
+        Object.assign( {}, compilerOptions, cOptions ),
+      )
 
-  // tips
-  if (compiled.tips && compiled.tips.length) {
-    compiled.tips.forEach(tip => {
-      loaderContext.emitWarning(tip)
-    })
-  }
+      if ( page ) {
+        loaderContext.megaloCacheToPages( page )
+      }
 
-  // errors
-  if (compiled.errors && compiled.errors.length) {
-    loaderContext.emitError(
-      `\n  Error compiling template:\n${pad(compiled.source)}\n` +
-        compiled.errors.map(e => `  - ${e}`).join('\n') +
-        '\n'
-    )
-  }
+      loaderContext.megaloCacheToTemplates(
+        realResourcePath,
+        {
+          source,
+          useCompiler: 'vue',
+        }
+      )
 
-  const { code } = compiled
+      // for vue-component-compiler
+      const finalOptions = {
+        source,
+        filename: this.resourcePath,
+        compiler,
+        compilerOptions: Object.assign( {}, compilerOptions, {
+          imports: cOptions.imports,
+        } ),
+        // allow customizing behavior of vue-template-es2015-compiler
+        transpileOptions: options.transpileOptions,
+        transformAssetUrls: options.transformAssetUrls || true,
+        isProduction,
+        isFunctional,
+        optimizeSSR: false
+      }
 
-  // finish with ESM exports
-  return code + `\nexport { render, staticRenderFns }`
+      const compiled = compileTemplate(finalOptions)
+
+      // tips
+      if (compiled.tips && compiled.tips.length) {
+        compiled.tips.forEach(tip => {
+          loaderContext.emitWarning(tip)
+        })
+      }
+
+      // errors
+      if (compiled.errors && compiled.errors.length) {
+        loaderContext.emitError(
+          `\n  Error compiling template:\n${pad(compiled.source)}\n` +
+            compiled.errors.map(e => `  - ${e}`).join('\n') +
+            '\n'
+        )
+      }
+
+      const { code } = compiled
+
+      // finish with ESM exports
+      callback( null, code + `\nexport { render, staticRenderFns }` )
+    } )
+    .catch( e => {
+      callback( e, source )
+    } )
 }
 
 function pad (source) {

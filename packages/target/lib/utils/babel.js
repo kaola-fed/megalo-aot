@@ -1,4 +1,4 @@
-const tryRequire = require( './try-require' )
+const tryRequire = require( './tryRequire' )
 
 const babel = tryRequire( '@babel/core', 'babel-core' )
 

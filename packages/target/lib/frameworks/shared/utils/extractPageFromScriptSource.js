@@ -9,7 +9,7 @@ const removeExtension = require( '../../../utils/removeExtension' )
 module.exports = function ( source, loaderContext ) {
   const entryHelper = loaderContext.megaloEntryHelper
 
-  const resourcePath = removeExtension( loaderContext.resourcePath, '.js' )
+  const resourcePath = removeExtension( loaderContext.resourcePath )
 
   if ( entryHelper.isEntry( resourcePath ) ) {
     const entryKey = entryHelper.getEntryKey( resourcePath )

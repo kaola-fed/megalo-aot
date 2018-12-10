@@ -19,7 +19,7 @@ module.exports = function( source ) {
 
   const descriptor = parse({
     source,
-    compiler: options.compiler || require( '@megalo/regular-template-compiler' ),
+    compiler: options.compiler || require( '@megalo/template-compiler' ),
     filename,
     sourceRoot,
     needMap: sourceMap

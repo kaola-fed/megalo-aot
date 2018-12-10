@@ -6,6 +6,7 @@ const vueEntryPath = require.resolve( './vue-entry' )
 const styleLoaderPath = require.resolve( './style' )
 const templateLoaderPath = require.resolve( './template' )
 const scriptLoaderPath = require.resolve( './script' )
+const selectorLoaderPath = require.resolve( './selector' )
 const configLoaderPath = require.resolve( './config' )
 
 const isESLintLoader = l => /(\/|\\|@)eslint-loader/.test(l.path)
@@ -13,6 +14,7 @@ const isNullLoader = l => /(\/|\\|@)null-loader/.test(l.path)
 const isCSSLoader = l => /(\/|\\|@)css-loader/.test(l.path)
 const isPitcher = l => l.path !== __filename
 const isBabelLoader = l => /(\/|\\|@)babel-loader/.test(l.path)
+const isNotSelfPath = l => selfPath !== l.path
 
 const dedupeESLintLoader = loaders => {
   const res = []
@@ -122,7 +124,9 @@ module.exports.pitch = function (remainingRequest) {
     const request = genRequest([
       ...cacheLoader,
       templateLoaderPath + `??vue-loader-options`,
-      ...loaders
+      selectorLoaderPath + `??vue-loader-options`,
+      ...loaders.filter(isNotSelfPath),
+      // ...loaders
     ])
     // console.log(request)
     // the template compiler uses esm exports
