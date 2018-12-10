@@ -1,6 +1,4 @@
-const tryRequire = require( './try-require' )
-
-const babel = tryRequire( '@babel/core', 'babel-core' )
+const babel = require( 'babel-core' )
 
 if ( !babel ) {
   throw new Error(
