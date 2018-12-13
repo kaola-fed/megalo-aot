@@ -1,5 +1,7 @@
-<template lang="html">
-  <div>B</div>
+<template>
+  <div>
+    das
+  </div>
 </template>
 
 <script>

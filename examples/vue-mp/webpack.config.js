@@ -70,6 +70,16 @@ module.exports = {
       },
 
       {
+        test: /\.pug$/,
+        oneOf: [  // this applies to `<template lang="pug">` in Vue components
+          {
+            resourceQuery: /^\?vue/,
+            use: [ 'pug-plain-loader' ]
+          }
+        ]
+      },
+
+      {
         test: /\.js$/,
         use: 'babel-loader'
       },
