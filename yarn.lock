@@ -1080,6 +1080,18 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
+"@megalo/regular-template-compiler@^0.1.0":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@megalo/regular-template-compiler/-/regular-template-compiler-0.1.1.tgz#7f87da5174562c8a903de481ba6aae669edc795c"
+  dependencies:
+    html-minifier "^3.5.21"
+    loader-utils "^1.1.0"
+    lodash.clonedeep "^4.5.0"
+    nanoid "^1.0.2"
+    prettier "^1.13.4"
+    regularjs "^0.6.0"
+    vue-template-compiler "2.5.17"
+
 "@megalo/target@^0.4.1", "@megalo/target@^0.4.2":
   version "0.4.10"
   resolved "https://registry.yarnpkg.com/@megalo/target/-/target-0.4.10.tgz#a562f73bac084ea155b1dac3dfc13ef5060b9ad6"

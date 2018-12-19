@@ -9,7 +9,9 @@ module.exports = {
   mode: 'development',
 
   target: createMegaloTarget( {
-    compiler: compiler,
+    compiler: {
+      regular: compiler
+    },
     platform: 'wechat',
   } ),
 
