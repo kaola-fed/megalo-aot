@@ -72,12 +72,12 @@ class Compiler {
         // find the same name in imports
         const foundKey = Object.keys( this.options.imports )
           .find( key => {
-            const { name, src } = this.options.imports[ key ]
+            const { name } = this.options.imports[ key ]
             return name === c.name
           } )
         const found = this.options.imports[ foundKey ]
 
-        return found && found.src
+        return found && found.name
       } )
 
     return {
@@ -114,7 +114,8 @@ class Compiler {
   }
 
   imports( { prefix = '', components, body } ) {
-    return prefix + components.map( c => `<import src="${ c.src }" />\n` ).join( '' ) + body
+    // const imports = components.map( c => `<import src="${ c.src }" />\n` ).join( '' )
+    return prefix + body
   }
 
   saveExpression( expr ) {

@@ -4,7 +4,7 @@
     { counter }
     <button on-click="{ this.onPlus() }">+</button>
     <abc>
-      slot test
+      xxx
     </abc>
     <cde></cde>
   </div>

@@ -1,6 +1,6 @@
 <template>
   <div class="a">
-    {#inc this.$body}
+    a: {#inc this.$body}
   </div>
 </template>
 
