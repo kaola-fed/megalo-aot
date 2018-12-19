@@ -1,12 +1,15 @@
 const qs = require( 'querystring' )
 const loaderUtils = require( 'loader-utils' )
 const hash = require( 'hash-sum' )
+const stringifyLoader = require( '../../../utils/stringifyLoader' )
+const genRequest = require( '../../../utils/generateRequest' )
 const selfPath = require.resolve( 'vue-loader' )
 const vueEntryPath = require.resolve( './vue-entry' )
 const styleLoaderPath = require.resolve( './style' )
+const preTemplateloaderPath = require.resolve( './pretemplate' )
 const templateLoaderPath = require.resolve( './template' )
 const scriptLoaderPath = require.resolve( './script' )
-const selectorLoaderPath = require.resolve( './selector' )
+const sfcLoaderPath = require.resolve( './sfc' )
 const configLoaderPath = require.resolve( './config' )
 
 const isESLintLoader = l => /(\/|\\|@)eslint-loader/.test(l.path)
@@ -15,6 +18,7 @@ const isCSSLoader = l => /(\/|\\|@)css-loader/.test(l.path)
 const isPitcher = l => l.path !== __filename
 const isBabelLoader = l => /(\/|\\|@)babel-loader/.test(l.path)
 const isNotSelfPath = l => selfPath !== l.path
+const isSelfPath = l => selfPath === l.path
 
 const dedupeESLintLoader = loaders => {
   const res = []
@@ -35,18 +39,19 @@ module.exports = source => source
 // This pitching loader is responsible for intercepting all vue block requests
 // and transform it into appropriate requests.
 module.exports.pitch = function (remainingRequest) {
-  const options = loaderUtils.getOptions(this)
+  const loaderContext = this
+  const options = loaderUtils.getOptions(loaderContext)
   const { cacheDirectory, cacheIdentifier } = options
   const query = qs.parse(this.resourceQuery.slice(1))
 
-  let loaders = this.loaders
+  let loaders = loaderContext.loaders
 
   // if this is a language block request, eslint-loader may get matched
   // multiple times
   if (query.type) {
     // if this is an inline block, since the whole file itself is being linted,
     // remove eslint-loader to avoid duplicate linting.
-    if (/\.vue$/.test(this.resourcePath)) {
+    if (/\.vue$/.test(loaderContext.resourcePath)) {
       loaders = loaders.filter(l => !isESLintLoader(l))
     } else {
       // This is a src import. Just make sure there's not more than 1 instance
@@ -65,39 +70,13 @@ module.exports.pitch = function (remainingRequest) {
     return
   }
 
-  const genRequest = loaders => {
-    // Important: dedupe since both the original rule
-    // and the cloned rule would match a source import request.
-    // also make sure to dedupe based on loader path.
-    // assumes you'd probably never want to apply the same loader on the same
-    // file twice.
-    const seen = new Map()
-    const loaderStrings = []
-
-    loaders.forEach(loader => {
-      const type = typeof loader === 'string' ? loader : loader.path
-      const request = typeof loader === 'string' ? loader : loader.request
-      if (!seen.has(type)) {
-        seen.set(type, true)
-        // loader.request contains both the resolved loader path and its options
-        // query (e.g. ??ref-0)
-        loaderStrings.push(request)
-      }
-    })
-
-    return loaderUtils.stringifyRequest(this, '-!' + [
-      ...loaderStrings,
-      this.resourcePath + this.resourceQuery
-    ].join('!'))
-  }
-
   // Inject style-post-loader before css-loader for scoped CSS and trimming
   if (query.type === `style`) {
     const cssLoaderIndex = loaders.findIndex(isCSSLoader)
     if (cssLoaderIndex > -1) {
       const afterLoaders = loaders.slice(0, cssLoaderIndex + 1)
       const beforeLoaders = loaders.slice(cssLoaderIndex + 1)
-      const request = genRequest([
+      const request = genRequest(loaderContext, [
         ...afterLoaders,
         styleLoaderPath,
         ...beforeLoaders
@@ -121,14 +100,36 @@ module.exports.pitch = function (remainingRequest) {
         cacheIdentifier: hash(cacheIdentifier) + '-vue-loader-template'
       })}`]
       : []
-    const request = genRequest([
+
+    const vueLoaderIndex = loaders.findIndex(isSelfPath)
+
+    let afterLoaders = []
+    let beforeLoaders = []
+
+    if ( ~vueLoaderIndex ) {
+      afterLoaders = loaders.slice(0, vueLoaderIndex)
+      beforeLoaders = loaders.slice(vueLoaderIndex + 1)
+    }
+
+    // if exists [lang]-loader, use pretemplate to process template content
+    let optionalLoader
+    if ( afterLoaders && afterLoaders.length > 0 ) {
+      optionalLoader = preTemplateloaderPath
+       + '?' + JSON.stringify( {
+        // file extension is not appended here, such as C.vue.pug
+        resourcePath: loaderContext.resourcePath,
+        resourceQuery: loaderContext.resourceQuery,
+        loaders: afterLoaders.map( stringifyLoader )
+      } )
+    }
+
+    const request = genRequest( loaderContext, [
       ...cacheLoader,
       templateLoaderPath + `??vue-loader-options`,
-      selectorLoaderPath + `??vue-loader-options`,
-      ...loaders.filter(isNotSelfPath),
-      // ...loaders
-    ])
-    // console.log(request)
+      optionalLoader,
+      sfcLoaderPath + `??vue-loader-options`
+    ].filter( Boolean ) )
+    // console.log( request )
     // the template compiler uses esm exports
     return `export * from ${request}`
   }
@@ -138,7 +139,7 @@ module.exports.pitch = function (remainingRequest) {
     if (babelLoaderIndex > -1) {
       const afterLoaders = loaders.slice(0, babelLoaderIndex + 1)
       const beforeLoaders = loaders.slice(babelLoaderIndex + 1)
-      const request = genRequest([
+      const request = genRequest(loaderContext, [
         ...afterLoaders,
         scriptLoaderPath,
         ...beforeLoaders
@@ -154,7 +155,7 @@ module.exports.pitch = function (remainingRequest) {
     query.blockType === 'config'
   ) {
     const vueLoader = loaders.find( l => l.path = selfPath )
-    const request = genRequest( [
+    const request = genRequest( loaderContext, [
       configLoaderPath,
     ].concat( vueLoader ? [ vueLoader ] : [] ) )
 
@@ -172,6 +173,6 @@ module.exports.pitch = function (remainingRequest) {
   // When the user defines a rule that has only resourceQuery but no test,
   // both that rule and the cloned rule will match, resulting in duplicated
   // loaders. Therefore it is necessary to perform a dedupe here.
-  const request = genRequest(loaders)
+  const request = genRequest(loaderContext, loaders)
   return `import mod from ${request}; export default mod; export * from ${request}`
 }

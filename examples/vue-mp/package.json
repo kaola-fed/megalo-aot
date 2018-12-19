@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "webpack -w",
+    "build": "webpack",
     "serve": "webpack-dev-server"
   },
   "keywords": [],
