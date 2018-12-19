@@ -3,6 +3,7 @@
     <button on-click="{ this.onMinus() }">-</button>
     { counter }
     <button on-click="{ this.onPlus() }">+</button>
+    <div r-html="{ h }"></div>
     <abc>
       xxx
     </abc>
@@ -25,6 +26,7 @@ export default {
 
   config() {
     this.data.counter = 0
+    this.data.h = `<div style="color: blue;">raw html</div>`
   },
 
   onMinus() {

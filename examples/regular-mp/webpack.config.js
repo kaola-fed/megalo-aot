@@ -9,8 +9,17 @@ module.exports = {
   mode: 'development',
 
   target: createMegaloTarget( {
-    compiler: compiler,
+    compiler: {
+      regular: compiler,
+    },
     platform: 'wechat',
+    htmlParse: {
+      templateName: 'octoParse',
+      src: path.resolve(
+        path.dirname( require.resolve( 'octoparse' ) ),
+        'lib/platform/wechat'
+      ),
+    }
   } ),
 
   entry: {

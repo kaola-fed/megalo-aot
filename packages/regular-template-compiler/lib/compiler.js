@@ -12,6 +12,7 @@ class Compiler {
     const tp = new Parser( template, {} )
     this.ast = tp.parse()
     this.options = options
+
     this.usedComponents = []
     this.marks = {
       eventId: 0,
@@ -426,7 +427,9 @@ class Compiler {
       const lists = this.history.search( 'list' )
       const keypath = this.marks.rhtmlId + ' ' + lists.map( list => `+ '-' + ${ list.data.index }` ).join( '' )
 
-      childrenStr = `<template is="wxParse" data="{{ wxParseData: __wxparsed[ ${ keypath } ] ? __wxparsed[ ${ keypath } ].nodes : [] }}"></template>`
+      if ( this.options.htmlParse ) {
+        childrenStr = `<template is="${ this.options.htmlParse.templateName }" data="{{ nodes: __wxparsed[ ${ keypath } ] ? __wxparsed[ ${ keypath } ].nodes : [] }}"></template>`
+      }
 
       ast.rhtmlId = this.marks.rhtmlId
       this.marks.rhtmlId++

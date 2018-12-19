@@ -25,6 +25,7 @@
     "less-loader": "^4.1.0",
     "mini-css-extract-plugin": "^0.4.1",
     "mpregular": "^0.1.8",
+    "octoparse": "^0.2.1",
     "vue": "^2.5.17",
     "vue-loader": "15.4.0",
     "vue-style-loader": "^4.1.1",
