@@ -13,6 +13,13 @@ module.exports = {
       regular: compiler
     },
     platform: 'wechat',
+    htmlParse: {
+      templateName: 'octoParse',
+      src: path.resolve(
+        path.dirname( require.resolve( 'octoparse' ) ),
+        'lib/platform/wechat'
+      ),
+    }
   } ),
 
   entry: {

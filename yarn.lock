@@ -6840,6 +6840,10 @@ octoparse@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/octoparse/-/octoparse-0.2.0.tgz#f8dbfcdd5f4227975ffcacc645e15214dc15b4e7"
 
+octoparse@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/octoparse/-/octoparse-0.2.1.tgz#16d64cc39571671473822f3e0f3e340d20154b32"
+
 on-finished@~2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/on-finished/-/on-finished-2.3.0.tgz#20f1336481b083cd75337992a16971aa2d906947"
