@@ -27,5 +27,5 @@ module.exports = function( source ) {
 
   loaderContext.resourcePath += '.' + (descriptor.template.lang || 'html')
 
-  loaderContext.callback( null, descriptor, null )
+  loaderContext.callback( null, descriptor.template.content, null )
 }
