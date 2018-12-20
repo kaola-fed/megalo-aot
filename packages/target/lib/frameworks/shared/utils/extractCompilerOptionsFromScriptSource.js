@@ -6,6 +6,8 @@ const hashify = require( '../../../utils/hashify' )
 const removeExtension = require( '../../../utils/removeExtension' )
 
 module.exports = function( source, extractComponentsPlugin, loaderContext ) {
+  let realResourcePath = removeExtension( loaderContext.resourcePath )
+
   const babelOptions = {
     filename: loaderContext.resourcePath,
     plugins: [
@@ -27,12 +29,12 @@ module.exports = function( source, extractComponentsPlugin, loaderContext ) {
           const hashed = hashify( resolved )
           tmp[ key ] = {
             name: hashed,
-            resolved
+            resolved,
+            context: realResourcePath
           }
         } )
     } )
   ).then( () => {
-    let realResourcePath = removeExtension( loaderContext.resourcePath )
     const compilerOptions = {
       name: hashify( realResourcePath ),
       imports: tmp,

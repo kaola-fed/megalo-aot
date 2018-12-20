@@ -27,7 +27,7 @@ module.exports = function ( source ) {
 ${ source.trim() }
 </config>
 `
-      loaderContext.emitError( reason )
+      loaderContext.emitError( new Error( reason ) )
     }
 
     loaderContext.megaloCacheToPages( {

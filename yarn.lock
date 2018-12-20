@@ -1092,24 +1092,6 @@
     regularjs "^0.6.0"
     vue-template-compiler "2.5.17"
 
-"@megalo/target@^0.4.1", "@megalo/target@^0.4.2":
-  version "0.4.10"
-  resolved "https://registry.yarnpkg.com/@megalo/target/-/target-0.4.10.tgz#a562f73bac084ea155b1dac3dfc13ef5060b9ad6"
-  dependencies:
-    "@megalo/regular-template-compiler" "^0.1.0"
-    "@megalo/template-compiler" "*"
-    "@vue/component-compiler-utils" "^2.1.2"
-    babel-generator "^6.26.1"
-    babelon "^1.0.5"
-    copy-webpack-plugin "^4.5.2"
-    hash-sum "^1.0.2"
-    loader-utils "^1.1.0"
-    lodash.merge "^4.6.1"
-    postcss "^7.0.2"
-    postcss-selector-parser "^5.0.0-rc.3"
-    querystring "^0.2.0"
-    semver "^5.6.0"
-
 "@megalo/template-compiler@*", "@megalo/template-compiler@^0.3.2":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@megalo/template-compiler/-/template-compiler-0.3.2.tgz#604bcee3fb144cd4fcc0bd5907ac5f0b0f7157de"
