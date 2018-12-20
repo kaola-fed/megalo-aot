@@ -1,3 +1,4 @@
+const path = require( 'path' )
 const qs = require( 'querystring' )
 const loaderUtils = require( 'loader-utils' )
 const { compileTemplate } = require('@vue/component-compiler-utils')
@@ -58,6 +59,8 @@ module.exports = function ( data ) {
     .then( data => {
       const [ cOptions, page ] = data || []
 
+      validateImports( loaderContext, cOptions.imports )
+
       loaderContext.megaloCacheToAllCompilerOptions(
         realResourcePath,
         Object.assign( {}, compilerOptions, cOptions ),
@@ -115,8 +118,32 @@ module.exports = function ( data ) {
       callback( null, code + `\nexport { render, staticRenderFns }` )
     } )
     .catch( e => {
+      loaderContext.emitError( e )
       callback( e, source )
     } )
+}
+
+function validateImports( loaderContext, imports ) {
+  const reg = /\.vue$/
+
+  Object.keys( imports ).forEach( key => {
+    const imp = imports[ key ]
+    const resolved = imp.resolved
+    const context = imp.context
+
+    if ( !reg.test( resolved ) ) {
+      loaderContext.emitError( new Error(
+        `\nCannot register "${ relativeToCwd( resolved ) }" as vue component ` +
+        `from "${ relativeToCwd( context ) }" as it's not a .vue file`
+      ) )
+    }
+  } )
+}
+
+function relativeToCwd( filepath ) {
+  const cwd = process.cwd()
+
+  return path.relative( cwd, filepath )
 }
 
 function pad (source) {

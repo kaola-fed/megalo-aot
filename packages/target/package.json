@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@megalo/regular-template-compiler": "^0.1.0",
+    "@megalo/regular-template-compiler": "^0.3.0",
     "@megalo/template-compiler": "*",
     "@vue/component-compiler-utils": "^2.1.2",
     "babel-generator": "^6.26.1",

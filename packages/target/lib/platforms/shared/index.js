@@ -4,6 +4,7 @@ const getMD5 = require( '../../utils/md5' )
 const hash = require( 'hash-sum' )
 const constants = require( './constants' )
 const subpackagesUtil = require( '../../utils/subpackages' )
+const emitError = require( './utils/emitError' )
 
 const DEFAULT_IMPORT_GENERATORS = {
   'import': {
@@ -179,13 +180,18 @@ module.exports = function( {
       // add dependency imports
       Object.keys( imports ).forEach( key => {
         const imp = imports[ key ]
-        const { root } = NAME_MAP[ imp.name ]
-        const importSrc = pathPrefix + constants.COMPONENT_OUTPUT_PATH
-          .replace( /\[root\]/g, root )
-          .replace( /\[name\]/g, imp.name ) +
-          extensions.template
 
-        content.push( generators.import.template( { src: importSrc } ) )
+        if ( NAME_MAP[ imp.name ] ) {
+          const { root } = NAME_MAP[ imp.name ]
+          const importSrc = pathPrefix + constants.COMPONENT_OUTPUT_PATH
+            .replace( /\[root\]/g, root )
+            .replace( /\[name\]/g, imp.name ) +
+            extensions.template
+
+          content.push( generators.import.template( { src: importSrc } ) )
+        } else {
+          // emitError( compilation, `Cannot resolve ${ imp.resolved } as component` )
+        }
       } )
 
       content.push( body )
@@ -238,8 +244,10 @@ function genSlotsGeneratorArgs( { slots, root = '', NAME_MAP, constants } ) {
 
   return slots.reduce( ( total, slot ) => {
     const srcs = slot.dependencies.map( name => {
-      const { outPath } = NAME_MAP[ name ]
-      return pathPrefix + outPath
+      if ( NAME_MAP[ name ] ) {
+        const { outPath } = NAME_MAP[ name ]
+        return pathPrefix + outPath
+      }
     } ).filter( Boolean )
 
     total.imports = total.imports.concat( srcs )
