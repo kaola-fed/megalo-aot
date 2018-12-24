@@ -50,7 +50,7 @@ class MegaloPlugin {
 
     hookAssets( {
       rules,
-      files: [ 'foo.ttf', 'foo.eot', 'foo.woff', 'foo.woff2' ],
+      files: [ 'foo.ttf', 'foo.eot', 'foo.woff', 'foo.woff2', 'foo.svg' ],
     } )
 
     // attach to loaderContext
