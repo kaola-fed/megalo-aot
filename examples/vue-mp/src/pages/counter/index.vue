@@ -57,6 +57,21 @@ export default {
   .app1 {
     font-size: 29px;
   }
+
+  .app /deep/ .aaa {
+    color: blue;
+  }
+  .app >>> .aaa {
+    color: blue;
+  }
+
+  >>> .b {
+    color: blue;
+  }
+
+  /deep/ .b {
+    color: blue;
+  }
 </style>
 
 <config>

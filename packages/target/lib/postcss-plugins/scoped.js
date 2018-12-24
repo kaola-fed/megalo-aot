@@ -29,12 +29,9 @@ module.exports = postcss.plugin('add-scoped-class', (options) => (root) => {
             return false
           }
           // /deep/ alias for >>>, since >>> doesn't work in SASS
-          if (n.type === 'tag' && n.value === '/deep/') {
-            const prev = n.prev()
-            if (prev && prev.type === 'combinator' && prev.value === ' ') {
-              prev.remove()
-            }
-            n.remove()
+          if (n.type === 'combinator' && n.value === '/deep/') {
+            n.value = ' '
+            n.spaces.before = n.spaces.after = ''
             return false
           }
           if (n.type !== 'pseudo' && n.type !== 'combinator') {
