@@ -1,4 +1,4 @@
-const regexp = /_o_\d+_O_([\s\S]+)_O_\d+_o_/g
+const regexp = /_o_\d+_O_([\s\S]+?)_O_\d+_o_/g
 
 const replacer = {
   _id: 0,
