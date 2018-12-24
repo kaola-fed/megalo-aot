@@ -28,7 +28,7 @@ module.exports = {
   output: {
     path: path.resolve( __dirname, 'dist/' ),
     filename: 'static/js/[name].js',
-    chunkFilename: 'static/js/[id].js'
+    chunkFilename: 'static/js/[id].js',
   },
 
   optimization: {
@@ -105,7 +105,21 @@ module.exports = {
           'css-loader',
           'less-loader',
         ]
-      }
+      },
+
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+              name: '[path][name].[ext]'
+            }
+          }
+        ]
+      },
+
     ]
   },
 
