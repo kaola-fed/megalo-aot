@@ -8,6 +8,7 @@
       <ChildInSlot></ChildInSlot>
     </Child>
     !!!
+    <img src="../../images/megalobox.jpeg" alt="">
   </div>
 </template>
 

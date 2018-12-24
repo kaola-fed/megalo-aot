@@ -13,13 +13,13 @@
 <script>
 import A from './A.vue'
 import B from './B.vue'
-import Test from './test'
+// import Test from './test'
 
 export default {
   components: {
     'abc': A,
     B,
-    Test,
+    // Test,
   },
   created() {
     console.log( 'created' )
