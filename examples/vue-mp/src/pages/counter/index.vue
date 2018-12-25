@@ -74,8 +74,21 @@ export default {
   }
 </style>
 
-<config>
-  {
-    a: 1,
-  }
+<config lang="yml">
+pages:
+    - pages/index
+subpackages:
+    -
+     root: packageA
+     pages:
+     	- pages/test
+    -
+     root: pages/packageB
+     pages:
+     	- pages/test
+window:
+    backgroundTextStyle: light
+    navigationBarBackgroundColor: '#fff'
+    navigationBarTitleText: demo
+    navigationBarTextStyle: black
 </config>
