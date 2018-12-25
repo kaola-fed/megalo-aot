@@ -25,6 +25,7 @@
     "babelon": "^1.0.5",
     "copy-webpack-plugin": "^4.5.2",
     "hash-sum": "^1.0.2",
+    "js-yaml": "^3.12.0",
     "json5": "^2.1.0",
     "loader-utils": "^1.1.0",
     "lodash.merge": "^4.6.1",
