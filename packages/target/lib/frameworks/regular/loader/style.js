@@ -1,6 +1,7 @@
 const qs = require( 'querystring' )
 const { compileStyle } = require( '@vue/component-compiler-utils' )
 const scoped = require( '../../../postcss-plugins/scoped' )
+const tagSelectorTransform = require( '../../../postcss-plugins/tag-selector-transform' )
 
 // This is a post loader that handles scoped CSS transforms.
 // Injected right before css-loader by the global pitcher (../pitch.js)
@@ -13,6 +14,8 @@ module.exports = function (source, inMap) {
   if ( isScoped ) {
     postcssPlugins.push( scoped( `r-${query.id}` ) )
   }
+
+  postcssPlugins.push( tagSelectorTransform() )
 
   const { code, map, errors } = compileStyle( {
     source,
