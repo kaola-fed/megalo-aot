@@ -17,8 +17,7 @@ module.exports.pitch = function ( remainingRequest ) {
         import Component from ${ JSON.stringify( '-!' + remainingRequest ) };
         import Vue from 'vue';
         Component.mpType = "${ entryKey === 'app' ? 'app' : 'page' }";
-        const app = new Vue(Component);
-        app.$mount();
+        new Vue(Component).$mount();
       `
     }
   }
