@@ -51,6 +51,10 @@ export default {
   .app .foo {
     color: blue;
   }
+
+  button {
+    border: solid 1px #ddd;
+  }
 </style>
 
 <style lang="css" scoped>
