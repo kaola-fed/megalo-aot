@@ -11,7 +11,10 @@ module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
       const selector = parser( selectors => {
         selectors.walkTags( tag => {
           // ignore orignial
-          if ( ignoreTags.indexOf( tag.value ) === -1 ) {
+          if (
+            ignoreTags.indexOf( tag.value ) === -1 &&
+            !/^\d+%?$/.test( tag.value )
+          ) {
             tag.value = `._${tag.value}`
           }
         } )
