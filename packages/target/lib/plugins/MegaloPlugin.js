@@ -11,6 +11,7 @@ const subpackagesUtil = require( '../utils/subpackages' )
 const walkObject = require( '../utils/walkObject' )
 const replacer = require( '../utils/replacer' )
 const toAsset = require( '../utils/toAsset' )
+const deferred = require( '../utils/deferred' )
 const platforms = require( '../platforms' )
 
 const pages = {}
@@ -56,6 +57,7 @@ class MegaloPlugin {
     // attach to loaderContext
     attachEntryHelper( compiler )
     attachCacheAPI( compiler )
+    attachDeferredAPI( compiler )
 
     // lazy emit files using `pages` && `allCompilerOptions` && `templates`
     lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
@@ -296,6 +298,23 @@ function attachCacheAPI( compiler ) {
     loaderContext.megaloCacheToPages = cacheToPages
     loaderContext.megaloCacheToAllCompilerOptions = cacheToAllCompilerOptions
     loaderContext.megaloCacheToTemplates = cacheToTemplates
+  } )
+}
+
+const _deferredCache = {}
+function attachDeferredAPI( compiler ) {
+  attach( 'megalo-plugin-deferred-api', compiler, loaderContext => {
+    loaderContext.megaloDeferred = function ( key ) {
+      if ( !_deferredCache[ key ] ) {
+        _deferredCache[ key ] = deferred()
+
+        _deferredCache[ key ].del = function () {
+          delete _deferredCache[ key ]
+        }
+      }
+
+      return _deferredCache[ key ]
+    }
   } )
 }
 
