@@ -7,17 +7,18 @@ const ignoreTags = [
 module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
 
   return function ( root, result ) {
-    root.walkRules( rule => {
-      const selector = parser( selectors => {
-        selectors.walkTags( tag => {
-          // ignore orignial
-          if ( ignoreTags.indexOf( tag.value ) === -1 ) {
-            tag.value = `._${tag.value}`
-          }
-        } )
-      } ).processSync( rule.selector )
-
-      rule.selector = selector
-    } )
+    root.each(r => {
+      if ( r.type !== 'atrule' || !/-keyframe/.test( r.name ) ) {
+        const selector = parser( selectors => {
+          selectors.walkTags( tag => {
+            // ignore orignial
+            if ( ignoreTags.indexOf( tag.value ) === -1 ) {
+              tag.value = `._${tag.value}`
+            }
+          } )
+        } ).processSync( r.selector )
+        r.selector = selector
+      }
+    })
   }
 } )
