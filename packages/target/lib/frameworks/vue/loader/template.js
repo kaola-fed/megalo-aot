@@ -13,10 +13,7 @@ const extractComponentsPlugin = require( '../babel-plugins/extract-components' )
 // Loader that compiles raw template into JavaScript functions.
 // This is injected by the global pitcher (../pitch) for template
 // selection requests initiated from vue files.
-module.exports = function ( data ) {
-  const source = data.template.content
-  const scriptSource = data.script.content
-
+module.exports = function ( source ) {
   const loaderContext = this
   const callback = loaderContext.async()
   const query = qs.parse(this.resourceQuery.slice(1))
@@ -50,13 +47,12 @@ module.exports = function ( data ) {
     md5
   })
 
-  const jobs = [
-    extractCompilerOptionsFromScriptSource( scriptSource, extractComponentsPlugin, loaderContext ),
-    extractPageFromScriptSource( scriptSource, loaderContext ),
-  ]
+  const deferred = loaderContext.megaloDeferred( realResourcePath )
 
-  Promise.all( jobs )
+  deferred.promise
     .then( data => {
+      deferred.del()
+
       const [ cOptions, page ] = data || []
 
       validateImports( loaderContext, cOptions.imports )

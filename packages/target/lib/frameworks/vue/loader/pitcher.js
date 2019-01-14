@@ -6,10 +6,8 @@ const genRequest = require( '../../../utils/generateRequest' )
 const selfPath = require.resolve( 'vue-loader' )
 const vueEntryPath = require.resolve( './vue-entry' )
 const styleLoaderPath = require.resolve( './style' )
-const preTemplateloaderPath = require.resolve( './pretemplate' )
 const templateLoaderPath = require.resolve( './template' )
 const scriptLoaderPath = require.resolve( './script' )
-const sfcLoaderPath = require.resolve( './sfc' )
 const configLoaderPath = require.resolve( './config' )
 
 const isESLintLoader = l => /(\/|\\|@)eslint-loader/.test(l.path)
@@ -101,33 +99,10 @@ module.exports.pitch = function (remainingRequest) {
       })}`]
       : []
 
-    const vueLoaderIndex = loaders.findIndex(isSelfPath)
-
-    let afterLoaders = []
-    let beforeLoaders = []
-
-    if ( ~vueLoaderIndex ) {
-      afterLoaders = loaders.slice(0, vueLoaderIndex)
-      beforeLoaders = loaders.slice(vueLoaderIndex + 1)
-    }
-
-    // if exists [lang]-loader, use pretemplate to process template content
-    let optionalLoader
-    if ( afterLoaders && afterLoaders.length > 0 ) {
-      optionalLoader = preTemplateloaderPath
-       + '?' + JSON.stringify( {
-        // file extension is not appended here, such as C.vue.pug
-        resourcePath: loaderContext.resourcePath,
-        resourceQuery: loaderContext.resourceQuery,
-        loaders: afterLoaders.map( stringifyLoader )
-      } )
-    }
-
     const request = genRequest( loaderContext, [
       ...cacheLoader,
       templateLoaderPath + `??vue-loader-options`,
-      optionalLoader,
-      sfcLoaderPath + `??vue-loader-options`
+      ...loaders,
     ].filter( Boolean ) )
     // console.log( request )
     // the template compiler uses esm exports
