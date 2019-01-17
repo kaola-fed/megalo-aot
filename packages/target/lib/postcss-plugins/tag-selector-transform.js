@@ -21,6 +21,10 @@ module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
 
       node.selector = parser( selectors => {
         selectors.walkTags( tag => {
+          if ( isChildOfPseudo( tag ) ) {
+            return
+          }
+
           // ignore orignial
           if ( !~ignoreTags.indexOf( tag.value ) ) {
             tag.value = `._${tag.value}`
@@ -28,5 +32,20 @@ module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
         } )
       } ).processSync( node.selector )
     } )
+
+    function isChildOfPseudo( tag ) {
+      let flag = false
+      let target = tag.parent
+
+      while ( target ) {
+        if ( target.type === 'pseudo' ) {
+          flag = true
+          break
+        }
+        target = target.parent
+      }
+
+      return flag
+    }
   }
 } )
