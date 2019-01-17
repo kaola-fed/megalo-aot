@@ -1,24 +1,32 @@
 const postcss = require( 'postcss' )
 const parser = require( 'postcss-selector-parser' )
-const ignoreTags = [
-  'page'
-]
 
 module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
-
   return function ( root, result ) {
-    root.each(r => {
-      if ( r.type !== 'atrule' || !/-keyframe/.test( r.name ) ) {
-        const selector = parser( selectors => {
-          selectors.walkTags( tag => {
-            // ignore orignial
-            if ( ignoreTags.indexOf( tag.value ) === -1 ) {
-              tag.value = `._${tag.value}`
-            }
-          } )
-        } ).processSync( r.selector )
-        r.selector = selector
+    const ignoreTags = [
+      'page'
+    ]
+
+    root.each( function rewrite( node ) {
+      if ( !node.selector ) {
+        if (
+          node.type === 'atrule' &&
+          ( node.name === 'media' || node.name === 'supports' )
+        ) {
+          node.each( rewrite )
+        }
+
+        return
       }
-    })
+
+      node.selector = parser( selectors => {
+        selectors.walkTags( tag => {
+          // ignore orignial
+          if ( !~ignoreTags.indexOf( tag.value ) ) {
+            tag.value = `._${tag.value}`
+          }
+        } )
+      } ).processSync( node.selector )
+    } )
   }
 } )
