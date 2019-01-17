@@ -4,8 +4,8 @@
       hello world!!!
       <Button>
         some text
+        <ChildInSlot></ChildInSlot>
       </Button>
-      <ChildInSlot></ChildInSlot>
     </Child>
     !!!
     <img src="../../images/megalobox.jpeg" alt="">
