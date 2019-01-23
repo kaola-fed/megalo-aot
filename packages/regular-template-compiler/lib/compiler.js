@@ -14,6 +14,8 @@ class Compiler {
     this.options = options
 
     this.usedComponents = []
+    this.slotDependencies = []
+    this.children = []
     this.marks = {
       eventId: 0,
       localComponentIndex: 0,
@@ -91,6 +93,7 @@ class Compiler {
           } ),
           dependencies: dependencies,
         } ) ),
+      children: this.children,
       ast: this.ast,
       body: wxml,
       expressions: this.usedExpressions,
@@ -262,6 +265,7 @@ class Compiler {
     }
 
     const defaultSlotId = nanoid()
+    let child
 
     if ( isComponent ) {
       ast.localComponentIndex = this.marks.localComponentIndex
@@ -270,6 +274,17 @@ class Compiler {
       // saved for prefixing imports
       if ( definition && !~this.usedComponents.indexOf( definition ) ) {
         this.usedComponents.push( definition )
+      }
+      
+      // skip dedupe
+      if ( definition ) {
+        child = {
+          name: definition.name,
+          slots: [],
+          children: [],
+        }
+        this.children.push( child )
+        this.slotDependencies.push( definition.name )
       }
 
       // change tag name to template
@@ -408,12 +423,35 @@ class Compiler {
       this.marks.eventId++
     }
 
+    // save slot dependencies
+    const oldSlotDependencies = this.slotDependencies
+    this.slotDependencies = []
+    
+    // save children
+    const oldChildren = this.children
+    if ( child ) {
+      this.children = child.children
+    }
+    
     // always execute render to save slots and expression
+    // record slot dependencies
     let childrenStr = this.render( children )
 
     if ( hasSlot ) {
       this.usedSlots.default[ defaultSlotId ] = childrenStr
+      // save slots
+      if ( child ) {
+        child.slots.push( {
+          slotName: defaultSlotId,
+          body: childrenStr,
+          dependencies: this.slotDependencies || []
+        } )
+      }
     }
+    
+    // merge
+    this.slotDependencies = oldSlotDependencies.concat( this.slotDependencies )
+    this.children = oldChildren
 
     // override children with r-html content
     /* @example
