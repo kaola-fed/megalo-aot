@@ -275,7 +275,7 @@ class Compiler {
       if ( definition && !~this.usedComponents.indexOf( definition ) ) {
         this.usedComponents.push( definition )
       }
-      
+
       // skip dedupe
       if ( definition ) {
         child = {
@@ -426,13 +426,13 @@ class Compiler {
     // save slot dependencies
     const oldSlotDependencies = this.slotDependencies
     this.slotDependencies = []
-    
+
     // save children
     const oldChildren = this.children
     if ( child ) {
       this.children = child.children
     }
-    
+
     // always execute render to save slots and expression
     // record slot dependencies
     let childrenStr = this.render( children )
@@ -443,12 +443,15 @@ class Compiler {
       if ( child ) {
         child.slots.push( {
           slotName: defaultSlotId,
-          body: childrenStr,
+          body: this.wrap( {
+            name: defaultSlotId,
+            body: childrenStr
+          } ),
           dependencies: this.slotDependencies || []
         } )
       }
     }
-    
+
     // merge
     this.slotDependencies = oldSlotDependencies.concat( this.slotDependencies )
     this.children = oldChildren
