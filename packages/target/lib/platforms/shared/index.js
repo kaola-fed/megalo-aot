@@ -26,7 +26,7 @@ module.exports = function( {
   ) {
     const { htmlParse = false, platform } = megaloOptions
 
-    let htmlParsePaths = {
+    const htmlParsePaths = {
       template: constants.HTMLPARSE_TEMPLATE_OUTPUT_PATH + extensions.template,
       style: constants.HTMLPARSE_STYLE_OUTPUT_PATH + extensions.style,
     }
@@ -297,6 +297,8 @@ module.exports = function( {
         slots: mainSlots,
         constants,
         NAME_MAP,
+        htmlParsePaths,
+        htmlParse,
       } ) ),
       compilation
     )
@@ -313,6 +315,8 @@ module.exports = function( {
           root,
           constants,
           NAME_MAP,
+          htmlParsePaths,
+          htmlParse,
         } ) ),
         compilation
       )
@@ -321,7 +325,10 @@ module.exports = function( {
   }
 }
 
-function genSlotsGeneratorArgs( { slots, root = '', NAME_MAP, constants } ) {
+function genSlotsGeneratorArgs( {
+  slots, root = '', NAME_MAP, constants,
+  htmlParsePaths, htmlParse
+} ) {
   slots = Array.from( slots )
   const slotOutPath = constants.SLOTS_OUTPUT_PATH
     .replace( /\[root\]/g, root )
@@ -340,7 +347,7 @@ function genSlotsGeneratorArgs( { slots, root = '', NAME_MAP, constants } ) {
 
     return total
   }, {
-    imports: [],
+    imports: htmlParse ? [ pathPrefix + htmlParsePaths.template ] : [],
     bodies: []
   } )
 }
