@@ -1,7 +1,7 @@
 const postcss = require( 'postcss' )
 const parser = require( 'postcss-selector-parser' )
 
-module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
+module.exports = postcss.plugin( 'postcss-transform-tag', function () {
   return function ( root, result ) {
     const ignoreTags = [
       'page'
@@ -19,7 +19,9 @@ module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
         return
       }
 
-      node.selector = parser( selectors => {
+      let transformed = false
+
+      const newSelector = parser( selectors => {
         selectors.walkTags( tag => {
           if ( isChildOfPseudo( tag ) ) {
             return
@@ -28,9 +30,16 @@ module.exports = postcss.plugin( 'postcss-transform-tag', function ( ) {
           // ignore orignial
           if ( !~ignoreTags.indexOf( tag.value ) ) {
             tag.value = `._${tag.value}`
+            transformed = true
           }
         } )
       } ).processSync( node.selector )
+
+      if ( transformed ) {
+        const cloned = node.clone()
+        cloned.selector = newSelector
+        node.before( cloned )
+      }
     } )
 
     function isChildOfPseudo( tag ) {

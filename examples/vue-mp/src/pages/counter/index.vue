@@ -55,6 +55,10 @@ export default {
   button {
     border: solid 1px #ddd;
   }
+
+  view {
+    line-height: 1;
+  }
 </style>
 
 <style lang="css" scoped>
