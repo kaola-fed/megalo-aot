@@ -43,6 +43,13 @@ class MegaloPlugin {
       },
     } )
 
+    // use to support multi-platform style in vue component
+    hookCss( {
+      rules,
+      files: [ 'foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus' ],
+      loader: require.resolve( '../loaders/multi-platform-style' ),
+    } )
+
     // hook url-loader/file-loader
     hookAssets( {
       rules,
@@ -163,7 +170,7 @@ function replaceGlobalObject( compiler, megaloOptions ) {
 }
 
 // [framework]-loader clones babel-loader rule, we shall ignore it
-function hookJSEntry( { rules, files = {}, entryLoader } ) {
+function hookJSEntry( { rules, files = [], entryLoader } ) {
   const entryRule = findRuleByFile( rules, files )
 
   if ( !entryRule ) {
@@ -176,6 +183,16 @@ function hookJSEntry( { rules, files = {}, entryLoader } ) {
   } )
 
   entryUse.splice( babelUseLoaderIndex + 1, 0, entryLoader )
+}
+
+function hookCss( { rules, files = [], loader } ) {
+  const entryRule = findRuleByFile( rules, files )
+
+  if ( !entryRule ) {
+    return
+  }
+
+  entryRule.use.unshift( loader )
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
