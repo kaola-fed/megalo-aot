@@ -9,7 +9,9 @@
   "files": [
     "lib"
   ],
-  "scripts": {},
+  "scripts": {
+    "ava": "ava __tests__/**/*.test.js"
+  },
   "keywords": [],
   "author": "",
   "repository": {
@@ -32,10 +34,21 @@
     "postcss": "^7.0.2",
     "postcss-selector-parser": "^5.0.0-rc.3",
     "querystring": "^0.2.0",
-    "semver": "^5.6.0"
+    "semver": "^5.6.0",
+    "webpack-chain": "^5.2.0"
   },
   "peerDependencies": {
     "vue-loader": "15.4.0",
     "webpack": "^4.16.5"
+  },
+  "devDependencies": {
+    "ava": "^1.2.1",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^2.1.0",
+    "mini-css-extract-plugin": "^0.5.0",
+    "node-sass": "^4.11.0",
+    "sass-loader": "^7.1.0",
+    "vue-loader": "^15.7.0",
+    "webpack-chain": "^5.2.0"
   }
 }
