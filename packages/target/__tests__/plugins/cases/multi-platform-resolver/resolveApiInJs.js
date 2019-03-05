@@ -1,3 +1,3 @@
-import demo from './demoApi.megalo'
+import demo from './demoApi/index.mpjs'
 
 demo();

@@ -1,6 +1,8 @@
 const forEachBail = require('enhanced-resolve/lib/forEachBail');
 const fs = require('fs');
-const extension = 'megalo';
+
+// consider only js file now
+const extension = 'mpjs';
 
 class MultiPlatformResolver {
     constructor(platform) {
@@ -15,7 +17,7 @@ class MultiPlatformResolver {
             .tapAsync("MultiPlatformResolver", (request, resolveContext, callback) => {
                 let requestPath = request.request,
                     dirPath = request.path,
-                    fileNameExp = new RegExp(`([\\w\\.-]+)(\\.${extension}$)`);
+                    fileNameExp = new RegExp(`([\\w\\.-]+)(\\/index\\.${extension}$)`);
            
                 // looking for file according to the following order:
                 //

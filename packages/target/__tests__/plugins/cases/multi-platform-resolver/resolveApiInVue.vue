@@ -2,7 +2,7 @@
     <div>hello</div>
 </template>
 <script>
-import demo from './demoApi.megalo'
+import demo from './demoApi/index.mpjs'
 
 export default {
     
