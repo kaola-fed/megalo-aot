@@ -49,6 +49,7 @@
     "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
     "vue-loader": "^15.7.0",
-    "webpack-chain": "^5.2.0"
+    "webpack-chain": "^5.2.0",
+    "yargs": "^13.2.2"
   }
 }

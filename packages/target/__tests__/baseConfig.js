@@ -5,7 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const Config = require('webpack-chain');
 const webpack = require('webpack');
 
-module.exports = function (relativePath, cb) {
+const createConfig = function (relativePath, cb) {
     return function (entry, platform = 'wechat') {
         const config = new Config();
 
@@ -41,7 +41,7 @@ module.exports = function (relativePath, cb) {
                     }
                 }
             })
-            
+
         config.module
             .rule('vue')
                 .test(/\.vue$/)
@@ -96,3 +96,5 @@ module.exports = function (relativePath, cb) {
         return config.toConfig();
     }
 }
+
+module.exports = createConfig
