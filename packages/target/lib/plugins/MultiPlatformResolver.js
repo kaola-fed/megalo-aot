@@ -1,4 +1,3 @@
-const forEachBail = require('enhanced-resolve/lib/forEachBail');
 const fs = require('fs');
 
 // consider only js file now
@@ -18,7 +17,7 @@ class MultiPlatformResolver {
                 let requestPath = request.request,
                     dirPath = request.path,
                     fileNameExp = new RegExp(`([\\w\\.-]+)(\\/index\\.${extension}$)`);
-           
+     
                 // looking for file according to the following order:
                 //
                 // 1. index.js
@@ -40,7 +39,7 @@ class MultiPlatformResolver {
                 
                     for (let i = attempts.length - 1; i >= 0; i--) {
                         let filePath = resolver.join(dirPath, attempts[i]);
-                    
+                        
                         if (fs.existsSync(filePath)) { // check if the file exists
                             filePathToBeDefine = filePath;
 

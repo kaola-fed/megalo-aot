@@ -1,7 +1,7 @@
 const test = require('ava');
 const path = require('path');
 const render = require('../render');
-const attachModuleToOptions = require('../../lib/platforms/shared/attachModuleToOptions.js');
+const attachModuleToOptions = require('../../lib/frameworks/vue/utils/attachMultiPlatformModule.js');
 
 let config = {
     target: 'wechat'

@@ -16,5 +16,9 @@ module.exports = function (option) {
         }
     }
 
-    option.modules = [removeTemplateModule];
+    if (typeof option.modules == "undefined") {
+        option.modules = [];
+    }
+
+    option.modules.push(removeTemplateModule);
 }
