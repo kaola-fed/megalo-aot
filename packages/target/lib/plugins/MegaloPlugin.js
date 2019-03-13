@@ -13,6 +13,8 @@ const replacer = require( '../utils/replacer' )
 const toAsset = require( '../utils/toAsset' )
 const deferred = require( '../utils/deferred' )
 const platforms = require( '../platforms' )
+const chalk = require('chalk')
+const MultiPlatformResolver = require( './MultiPlatformResolver' )
 
 const pages = {}
 const allCompilerOptions = {}
@@ -33,6 +35,9 @@ class MegaloPlugin {
     // replace globalObject
     replaceGlobalObject( compiler, megaloOptions )
 
+    // modify the resolve options
+    modifyResolveOption(compiler, megaloOptions);
+
     // generate pages
     hookJSEntry( {
       rules,
@@ -41,6 +46,13 @@ class MegaloPlugin {
         options: {},
         loader: require.resolve( '../loaders/js-entry' ),
       },
+    } )
+
+    // use to support multi-platform style in vue component
+    hookCss( {
+      rules,
+      files: [ 'foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus', 'foo.mcss' ],
+      loader: require.resolve( '../loaders/multi-platform-style' ),
     } )
 
     // hook url-loader/file-loader
@@ -64,6 +76,31 @@ class MegaloPlugin {
 
     compiler.options.module.rules = rules
   }
+}
+
+function modifyResolveOption ( compiler, options ) {
+  const { platform = 'wechat' } = options;
+
+  // add to webpack resolve.plugins in order to resolve multi-platform js module
+  !compiler.options.resolve.plugins && (compiler.options.resolve.plugins = []);
+  compiler.options.resolve.plugins.push(new MultiPlatformResolver(platform));
+  
+  // require multi-platform module like a directory
+  const mainFiles = ['index', `index.${platform}`, 'index.default'];
+  const extensions = ['.vue', '.js', '.json'];
+  
+  compiler.options.resolve.mainFiles = getConcatedArray(compiler.options.resolve.mainFiles, mainFiles);
+  compiler.options.resolve.extensions = getConcatedArray(compiler.options.resolve.extensions, extensions);
+
+  compiler.options.resolve.mainFiles.length > mainFiles.length && console.log(chalk.yellow('warning') + " megalo modified your webpack config " + chalk.bgBlue("resolve.mainFiles") + ", contact us if any problem occurred");
+}
+
+function getConcatedArray (source, target) {
+  if (!source) {
+    return target;
+  }
+
+  return [...new Set(source.concat(target))]
 }
 
 function hookAssets( { rules, files } ) {
@@ -163,7 +200,7 @@ function replaceGlobalObject( compiler, megaloOptions ) {
 }
 
 // [framework]-loader clones babel-loader rule, we shall ignore it
-function hookJSEntry( { rules, files = {}, entryLoader } ) {
+function hookJSEntry( { rules, files = [], entryLoader } ) {
   const entryRule = findRuleByFile( rules, files )
 
   if ( !entryRule ) {
@@ -176,6 +213,16 @@ function hookJSEntry( { rules, files = {}, entryLoader } ) {
   } )
 
   entryUse.splice( babelUseLoaderIndex + 1, 0, entryLoader )
+}
+
+function hookCss( { rules, files = [], loader } ) {
+  const entryRule = findRuleByFile( rules, files )
+
+  if ( !entryRule ) {
+    return
+  }
+
+  entryRule.use.unshift( loader )
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {

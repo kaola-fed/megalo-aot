@@ -9,6 +9,7 @@ const extractCompilerOptionsFromScriptSource =
 const extractPageFromScriptSource =
   require( '../../shared/utils/extractPageFromScriptSource' )
 const extractComponentsPlugin = require( '../babel-plugins/extract-components' )
+const attachMultiPlatformModule = require('../utils/attachMultiPlatformModule')
 
 // Loader that compiles raw template into JavaScript functions.
 // This is injected by the global pitcher (../pitch) for template
@@ -46,6 +47,9 @@ module.exports = function ( source ) {
     target,
     md5
   })
+
+  // add module to compiler option in order to handle <template platform="xxx">
+  attachMultiPlatformModule(compilerOptions);
 
   const deferred = loaderContext.megaloDeferred( realResourcePath )
 
