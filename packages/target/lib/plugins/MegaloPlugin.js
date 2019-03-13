@@ -21,61 +21,58 @@ const allCompilerOptions = {}
 const templates = {}
 
 class MegaloPlugin {
-  constructor(options = {}) {
+  constructor( options = {} ) {
     this.options = options
   }
 
-  apply(compiler) {
+  apply( compiler ) {
     const compilerOptions = compiler.options
     const rawRules = compilerOptions.module.rules
-    const { rules } = new RuleSet(rawRules)
+    const { rules } = new RuleSet( rawRules )
     const megaloOptions = this.options
     const megaloTemplateCompiler = megaloOptions.compiler
 
     // replace globalObject
-    replaceGlobalObject(compiler, megaloOptions)
+    replaceGlobalObject( compiler, megaloOptions )
 
     // modify the resolve options
     modifyResolveOption(compiler, megaloOptions);
 
-    // modify the resolve options
-    modifyResolveOption( compiler, megaloOptions );
-
     // generate pages
-    hookJSEntry({
+    hookJSEntry( {
       rules,
-      files: ['foo.js', 'foo.ts'],
+      files: [ 'foo.js', 'foo.ts' ],
       entryLoader: {
         options: {},
-        loader: require.resolve('../loaders/js-entry'),
+        loader: require.resolve( '../loaders/js-entry' ),
       },
-    })
+    } )
 
     // use to support multi-platform style in vue component
-    hookCss({
+    hookCss( {
       rules,
       files: [ 'foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus', 'foo.mcss' ],
       loader: require.resolve( '../loaders/multi-platform-style' ),
     } )
 
     // hook url-loader/file-loader
-    hookAssets({
+    hookAssets( {
       rules,
-      files: ['foo.jpg', 'foo.jpeg', 'foo.png', 'foo.gif'],
-    })
+      files: [ 'foo.jpg', 'foo.jpeg', 'foo.png', 'foo.gif' ],
+    } )
 
-    hookAssets({
+    hookAssets( {
       rules,
-      files: ['foo.ttf', 'foo.eot', 'foo.woff', 'foo.woff2', 'foo.svg'],
-    })
+      files: [ 'foo.ttf', 'foo.eot', 'foo.woff', 'foo.woff2', 'foo.svg' ],
+    } )
 
     // attach to loaderContext
-    attachEntryHelper(compiler)
-    attachCacheAPI(compiler)
-    attachDeferredAPI(compiler)
+    attachEntryHelper( compiler )
+    attachCacheAPI( compiler )
+    attachDeferredAPI( compiler )
 
     // lazy emit files using `pages` && `allCompilerOptions` && `templates`
-    lazyEmit(compiler, megaloTemplateCompiler, megaloOptions)
+    lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
 
     compiler.options.module.rules = rules
   }
@@ -109,17 +106,17 @@ function getConcatedArray (source, target) {
 function hookAssets( { rules, files } ) {
   const rule = findRuleByFile( rules, files )
 
-  if (!rule) {
+  if ( !rule ) {
     return
   }
 
   const use = rule.use
-  const urlLoader = use.find(u => {
-    return /^url-loader|(\/|\\|@)url-loader/.test(u.loader)
-  })
-  const fileLoader = use.find(u => {
-    return /^file-loader|(\/|\\|@)file-loader/.test(u.loader)
-  })
+  const urlLoader = use.find( u => {
+    return /^url-loader|(\/|\\|@)url-loader/.test( u.loader )
+  } )
+  const fileLoader = use.find( u => {
+    return /^file-loader|(\/|\\|@)file-loader/.test( u.loader )
+  } )
 
   replacePublicPathOption(
     urlLoader ||
@@ -127,19 +124,19 @@ function hookAssets( { rules, files } ) {
   )
 }
 
-function replacePublicPathOption(loader) {
-  if (!loader) {
+function replacePublicPathOption( loader ) {
+  if ( !loader ) {
     return
   }
 
-  if (!loader.options) {
+  if ( !loader.options ) {
     loader.options = {}
   }
 
   // already hooked before
   if (
     loader.options.outputPath &&
-    (loader.options.outputPath.hooked === true)
+    ( loader.options.outputPath.hooked === true )
   ) {
     return
   }
@@ -148,18 +145,18 @@ function replacePublicPathOption(loader) {
 
   const oldOutputPath = options.outputPath
 
-  options.outputPath = function (url, resourcePath, context) {
+  options.outputPath = function ( url, resourcePath, context ) {
     let outputPath = url
 
-    if (oldOutputPath) {
+    if ( oldOutputPath ) {
       if (typeof oldOutputPath === 'function') {
         outputPath = oldOutputPath(url, resourcePath, context)
       } else {
-        outputPath = path.posix.join(oldOutputPath, url)
+        outputPath = path.posix.join( oldOutputPath, url )
       }
     }
 
-    outputPath = replacer.encode(outputPath)
+    outputPath = replacer.encode( outputPath )
 
     return outputPath
   }
@@ -167,34 +164,34 @@ function replacePublicPathOption(loader) {
   options.outputPath.hooked = true
 }
 
-function fixAssetPaths({ assets, subpackages }) {
-  Object.keys(assets).map(path => {
-    const source = assets[path].source()
+function fixAssetPaths( { assets, subpackages } ) {
+  Object.keys( assets ).map( path => {
+    const source = assets[ path ].source()
 
-    if (replacer.isEncoded(source)) {
-      const decodedSource = replacer.decode(source, matched => {
-        const subpackage = subpackagesUtil.findSubpackage(matched, subpackages)
-        if (subpackage) {
-          const inSubpackage = matched.indexOf(subpackage.root + '/') === 0
-          if (!inSubpackage) {
+    if ( replacer.isEncoded( source ) ) {
+      const decodedSource = replacer.decode( source, matched => {
+        const subpackage = subpackagesUtil.findSubpackage( matched, subpackages )
+        if ( subpackage ) {
+          const inSubpackage = matched.indexOf( subpackage.root + '/' ) === 0
+          if ( !inSubpackage ) {
             return subpackage.root + '/' + matched
           }
         }
 
         return matched
-      })
+      } )
 
-      assets[path] = toAsset(decodedSource)
+      assets[ path ] = toAsset( decodedSource )
     }
 
-    if (replacer.isEncoded(path)) {
-      assets[replacer.clean(path)] = assets[path]
-      delete assets[path]
+    if ( replacer.isEncoded( path ) ) {
+      assets[ replacer.clean( path ) ] = assets[ path ]
+      delete assets[ path ]
     }
-  })
+  } )
 }
 
-function replaceGlobalObject(compiler, megaloOptions) {
+function replaceGlobalObject( compiler, megaloOptions ) {
   if (megaloOptions.platform === 'alipay') {
     compiler.options.output.globalObject = 'my'
   } else {
@@ -203,32 +200,32 @@ function replaceGlobalObject(compiler, megaloOptions) {
 }
 
 // [framework]-loader clones babel-loader rule, we shall ignore it
-function hookJSEntry({ rules, files = [], entryLoader }) {
-  const entryRule = findRuleByFile(rules, files)
+function hookJSEntry( { rules, files = [], entryLoader } ) {
+  const entryRule = findRuleByFile( rules, files )
 
-  if (!entryRule) {
+  if ( !entryRule ) {
     return
   }
 
   const entryUse = entryRule.use
-  const babelUseLoaderIndex = entryUse.findIndex(u => {
-    return /^babel-loader|(\/|\\|@)babel-loader/.test(u.loader)
-  })
+  const babelUseLoaderIndex = entryUse.findIndex( u => {
+    return /^babel-loader|(\/|\\|@)babel-loader/.test( u.loader )
+  } )
 
-  entryUse.splice(babelUseLoaderIndex + 1, 0, entryLoader)
+  entryUse.splice( babelUseLoaderIndex + 1, 0, entryLoader )
 }
 
-function hookCss({ rules, files = [], loader }) {
-  const entryRule = findRuleByFile(rules, files)
+function hookCss( { rules, files = [], loader } ) {
+  const entryRule = findRuleByFile( rules, files )
 
-  if (!entryRule) {
+  if ( !entryRule ) {
     return
   }
 
-  entryRule.use.unshift(loader)
+  entryRule.use.unshift( loader )
 }
 
-function lazyEmit(compiler, megaloTemplateCompiler, megaloOptions) {
+function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
   const { platform = 'wechat' } = megaloOptions
 
   compiler.hooks.emit.tap(
@@ -237,13 +234,13 @@ function lazyEmit(compiler, megaloTemplateCompiler, megaloOptions) {
       const { entrypoints, assets } = compilation || {}
       const appConfig = pages.app && pages.app.config && pages.app.config || {}
       const subpackages = appConfig.subpackages || appConfig.subPackages || []
-      const { codegen } = platforms[platform]
+      const { codegen } = platforms[ platform ]
 
       // move assets to subpackage
-      moveAssets({ assets, subpackages })
+      moveAssets( { assets, subpackages } )
       // fix assets path generated by file-loder
       // as as we change the output path with `moveAssets`
-      fixAssetPaths({ assets, subpackages })
+      fixAssetPaths( { assets, subpackages } )
 
       // emit files, includes:
       // 1. pages (wxml/wxss/js/json)
@@ -251,13 +248,13 @@ function lazyEmit(compiler, megaloTemplateCompiler, megaloOptions) {
       // 3. slots
       // 4. htmlparse
       codegen(
-        normalizePages({
+        normalizePages( {
           pages,
           assets,
           subpackages,
           entrypoints,
           platform,
-        }),
+        } ),
         {
           subpackages,
           templates,
@@ -274,129 +271,129 @@ function lazyEmit(compiler, megaloTemplateCompiler, megaloOptions) {
   )
 }
 
-function normalizePages({ pages, assets, subpackages, entrypoints, platform }) {
-  const chunkFiles = sortEntrypointFiles(entrypoints, platform)
+function normalizePages( { pages, assets, subpackages, entrypoints, platform } ) {
+  const chunkFiles = sortEntrypointFiles( entrypoints, platform )
   const normalized = []
 
-  Object.keys(pages).map(k => {
-    const page = pages[k] || {}
-    const subpackage = subpackagesUtil.findSubpackage(page.file, subpackages)
+  Object.keys( pages ).map( k => {
+    const page = pages[ k ] || {}
+    const subpackage = subpackagesUtil.findSubpackage( page.file, subpackages )
     // prefix root for subpackage files
-    const files = normalizeFiles({
-      files: chunkFiles[k],
+    const files = normalizeFiles( {
+      files: chunkFiles[ k ],
       subpackage,
       assets, // ensure resource is emitted in assets
-    })
+    } )
 
     // add chunk files for pages
-    const newPage = Object.assign({}, page, { files })
+    const newPage = Object.assign( {}, page, { files } )
 
     // subpackage should prefix root
-    if (subpackage) {
+    if ( subpackage ) {
       page.entryComponent.root = subpackage.root
     } else {
       page.entryComponent.root = ''
     }
 
-    normalized.push(newPage)
-  })
+    normalized.push( newPage )
+  } )
 
   return normalized
 }
 
-function normalizeFiles({ files, subpackage, assets }) {
+function normalizeFiles( { files, subpackage, assets } ) {
   const root = subpackage ? subpackage.root + '/' : ''
 
-  walkObject(files, (file, key, parent) => {
-    if (typeof file === 'string') {
+  walkObject( files, ( file, key, parent ) => {
+    if ( typeof file === 'string' ) {
       const renamed = root + file
 
       // exists
-      if (subpackage && assets[renamed]) {
-        parent[key] = renamed
+      if ( subpackage && assets[ renamed ] ) {
+        parent[ key ] = renamed
       }
     }
-  })
+  } )
 
   return files
 }
 
-function moveAssets({ assets = {}, subpackages = [] }) {
-  Object.keys(assets).map(path => {
-    const subpackage = subpackagesUtil.findSubpackage(path, subpackages)
+function moveAssets( { assets = {}, subpackages = [] } ) {
+  Object.keys( assets ).map( path => {
+    const subpackage = subpackagesUtil.findSubpackage( path, subpackages )
 
-    if (subpackage) {
-      const inSubpackage = path.indexOf(subpackage.root + '/') === 0
-      if (!inSubpackage) {
-        assets[subpackage.root + '/' + path] = assets[path]
-        delete assets[path]
+    if ( subpackage ) {
+      const inSubpackage = path.indexOf( subpackage.root + '/' ) === 0
+      if ( !inSubpackage ) {
+        assets[ subpackage.root + '/' + path ] = assets[ path ]
+        delete assets[ path ]
       }
     }
-  })
+  } )
 }
 
-function attachEntryHelper(compiler) {
-  const entryHelper = createEntryHelper(compiler.options.entry)
+function attachEntryHelper( compiler ) {
+  const entryHelper = createEntryHelper( compiler.options.entry )
 
-  attach('megalo-plugin-entry-helper', compiler, loaderContext => {
+  attach( 'megalo-plugin-entry-helper', compiler, loaderContext => {
     loaderContext.megaloEntryHelper = entryHelper
-  })
+  } )
 }
 
-function attachCacheAPI(compiler) {
-  attach('megalo-plugin-cache-api', compiler, loaderContext => {
+function attachCacheAPI( compiler ) {
+  attach( 'megalo-plugin-cache-api', compiler, loaderContext => {
     loaderContext.megaloCacheToPages = cacheToPages
     loaderContext.megaloCacheToAllCompilerOptions = cacheToAllCompilerOptions
     loaderContext.megaloCacheToTemplates = cacheToTemplates
-  })
+  } )
 }
 
 const _deferredCache = {}
-function attachDeferredAPI(compiler) {
-  attach('megalo-plugin-deferred-api', compiler, loaderContext => {
-    loaderContext.megaloDeferred = function (key) {
-      if (!_deferredCache[key]) {
-        _deferredCache[key] = deferred()
+function attachDeferredAPI( compiler ) {
+  attach( 'megalo-plugin-deferred-api', compiler, loaderContext => {
+    loaderContext.megaloDeferred = function ( key ) {
+      if ( !_deferredCache[ key ] ) {
+        _deferredCache[ key ] = deferred()
 
-        _deferredCache[key].del = function () {
-          delete _deferredCache[key]
+        _deferredCache[ key ].del = function () {
+          delete _deferredCache[ key ]
         }
       }
 
-      return _deferredCache[key]
+      return _deferredCache[ key ]
     }
-  })
+  } )
 }
 
 // sideEffects: true
-function cacheToPages({ file, config, entryComponent } = {}) {
-  if (!pages[file]) {
-    pages[file] = {}
+function cacheToPages( { file, config, entryComponent } = {} ) {
+  if ( !pages[ file ] ) {
+    pages[ file ] = {}
   }
 
-  if (file) {
-    pages[file].file = file
+  if ( file ) {
+    pages[ file ].file = file
   }
 
   // merge config
-  if (config) {
-    pages[file].config = Object.assign({}, pages[file].config || {}, config)
+  if ( config ) {
+    pages[ file ].config = Object.assign( {}, pages[ file ].config || {}, config )
   }
 
-  if (entryComponent) {
-    pages[file].entryComponent = entryComponent
+  if ( entryComponent ) {
+    pages[ file ].entryComponent = entryComponent
   }
 }
 
-function cacheToAllCompilerOptions(resourcePath, compilerOptions = {}) {
+function cacheToAllCompilerOptions( resourcePath, compilerOptions = {} ) {
   resourcePath = removeExtension(resourcePath)
-  allCompilerOptions[resourcePath] = allCompilerOptions[resourcePath] || {}
-  Object.assign(allCompilerOptions[resourcePath], compilerOptions)
+  allCompilerOptions[ resourcePath ] = allCompilerOptions[ resourcePath ] || {}
+  Object.assign( allCompilerOptions[ resourcePath ], compilerOptions )
 }
 
-function cacheToTemplates(resourcePath, template) {
+function cacheToTemplates( resourcePath, template ) {
   resourcePath = removeExtension(resourcePath)
-  templates[resourcePath] = template
+  templates[ resourcePath ] = template
 }
 
 module.exports = MegaloPlugin
