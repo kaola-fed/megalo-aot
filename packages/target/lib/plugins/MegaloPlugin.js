@@ -1,20 +1,20 @@
-const path = require('path')
-const qs = require('querystring')
-const RuleSet = require('webpack/lib/RuleSet')
-const findRuleByFile = require('../utils/findRuleByFile')
-const findRuleByQuery = require('../utils/findRuleByQuery')
-const createEntryHelper = require('../utils/createEntryHelper')
-const attach = require('../utils/attachLoaderContext')
-const sortEntrypointFiles = require('../utils/sortEntrypointFiles')
-const removeExtension = require('../utils/removeExtension')
-const subpackagesUtil = require('../utils/subpackages')
-const walkObject = require('../utils/walkObject')
-const replacer = require('../utils/replacer')
-const toAsset = require('../utils/toAsset')
-const deferred = require('../utils/deferred')
-const platforms = require('../platforms')
+const path = require( 'path' )
+const qs = require( 'querystring' )
+const RuleSet = require( 'webpack/lib/RuleSet' )
+const findRuleByFile = require( '../utils/findRuleByFile' )
+const findRuleByQuery = require( '../utils/findRuleByQuery' )
+const createEntryHelper = require( '../utils/createEntryHelper' )
+const attach = require( '../utils/attachLoaderContext' )
+const sortEntrypointFiles = require( '../utils/sortEntrypointFiles' )
+const removeExtension = require( '../utils/removeExtension' )
+const subpackagesUtil = require( '../utils/subpackages' )
+const walkObject = require( '../utils/walkObject' )
+const replacer = require( '../utils/replacer' )
+const toAsset = require( '../utils/toAsset' )
+const deferred = require( '../utils/deferred' )
+const platforms = require( '../platforms' )
 const chalk = require('chalk')
-const MultiPlatformResolver = require('./MultiPlatformResolver')
+const MultiPlatformResolver = require( './MultiPlatformResolver' )
 
 const pages = {}
 const allCompilerOptions = {}
@@ -38,6 +38,9 @@ class MegaloPlugin {
     // modify the resolve options
     modifyResolveOption(compiler, megaloOptions);
 
+    // modify the resolve options
+    modifyResolveOption( compiler, megaloOptions );
+
     // generate pages
     hookJSEntry({
       rules,
@@ -51,9 +54,9 @@ class MegaloPlugin {
     // use to support multi-platform style in vue component
     hookCss({
       rules,
-      files: ['foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus', 'foo.mcss'],
-      loader: require.resolve('../loaders/multi-platform-style'),
-    })
+      files: [ 'foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus', 'foo.mcss' ],
+      loader: require.resolve( '../loaders/multi-platform-style' ),
+    } )
 
     // hook url-loader/file-loader
     hookAssets({
@@ -78,25 +81,24 @@ class MegaloPlugin {
   }
 }
 
-function modifyResolveOption(compiler, options) {
+function modifyResolveOption ( compiler, options ) {
   const { platform = 'wechat' } = options;
 
   // add to webpack resolve.plugins in order to resolve multi-platform js module
   !compiler.options.resolve.plugins && (compiler.options.resolve.plugins = []);
   compiler.options.resolve.plugins.push(new MultiPlatformResolver(platform));
-
+  
   // require multi-platform module like a directory
   const mainFiles = ['index', `index.${platform}`, 'index.default'];
   const extensions = ['.vue', '.js', '.json'];
-
+  
   compiler.options.resolve.mainFiles = getConcatedArray(compiler.options.resolve.mainFiles, mainFiles);
   compiler.options.resolve.extensions = getConcatedArray(compiler.options.resolve.extensions, extensions);
 
   compiler.options.resolve.mainFiles.length > mainFiles.length && console.log(chalk.yellow('warning') + " megalo modified your webpack config " + chalk.bgBlue("resolve.mainFiles") + ", contact us if any problem occurred");
-
 }
 
-function getConcatedArray(source, target) {
+function getConcatedArray (source, target) {
   if (!source) {
     return target;
   }
@@ -104,8 +106,8 @@ function getConcatedArray(source, target) {
   return [...new Set(source.concat(target))]
 }
 
-function hookAssets({ rules, files }) {
-  const rule = findRuleByFile(rules, files)
+function hookAssets( { rules, files } ) {
+  const rule = findRuleByFile( rules, files )
 
   if (!rule) {
     return
