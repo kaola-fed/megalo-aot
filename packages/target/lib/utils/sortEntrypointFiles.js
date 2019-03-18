@@ -2,6 +2,7 @@ module.exports = function ( entrypoints, platform = 'wechat' ) {
   const results = {}
   const cssExt = platform === 'alipay' ? 'acss' :
     platform === 'swan' ? 'css' :
+    platform === 'toutiao' ? 'ttss' :
     'wxss'
 
   entrypoints.forEach( ( entrypoint, file ) => {
