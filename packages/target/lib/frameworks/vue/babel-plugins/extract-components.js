@@ -13,6 +13,15 @@ module.exports = function ( { types: t } ) {
         // parse components in typescript decorator
         if (isTypescriptDecorator(path)) {
           handleTypescriptDecorator(path)
+        
+        // handle code like the following
+        // App = tslib_1.__decorate([
+        //     Component({
+        //         components: { UiButton }
+        //     })
+        // ], App);
+        } else if (path.node.callee && path.node.callee.property && path.node.callee.property.name == '__decorate') {
+          handleNewTypescriptDecorator(path)
         }
       }
     },
@@ -82,5 +91,17 @@ module.exports = function ( { types: t } ) {
 
   function findComponentDecorator( decorators ) {
     return decorators.find(node => t.isCallExpression(node) && node.callee.name === 'Component')
+  }
+
+  function handleNewTypescriptDecorator (path) {
+    path.node.arguments.forEach(function (arg) {
+      if (arg.type == 'ArrayExpression') {
+        arg.elements.forEach(function (ele) {
+          if (ele.type == 'CallExpression' && ele.callee.name == "Component") {
+            handleObjectExpression(ele.arguments[0], path);
+          }
+        });
+      }
+    });
   }
 }
