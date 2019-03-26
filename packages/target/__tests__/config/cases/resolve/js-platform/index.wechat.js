@@ -1,6 +1,6 @@
 
 module.exports = {
-    str: 'wechat-platform',
-    from: 'index.wechat'
+    str: 'js-platform',
+    from: 'index.platform'
 }
             

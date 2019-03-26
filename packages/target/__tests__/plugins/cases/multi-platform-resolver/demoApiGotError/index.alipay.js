@@ -1,5 +1,5 @@
 module.exports = {
-    indexFirst () {
+    init () {
         return 'alipay';
     }
 }

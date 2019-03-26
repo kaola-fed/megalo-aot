@@ -99,7 +99,7 @@ function modifyResolveOption ( compiler, options ) {
   compiler.options.resolve.plugins.push(new MultiPlatformResolver(platform));
   
   // require multi-platform module like a directory
-  const mainFiles = ['index', `index.${platform}`, 'index.default'];
+  const mainFiles = [`index.${platform}`, 'index'];
   const extensions = ['.vue', '.js', '.json'];
   
   compiler.options.resolve.mainFiles = getConcatedArray(compiler.options.resolve.mainFiles, mainFiles);

@@ -1,6 +1,6 @@
 
 module.exports = {
-    str: 'wechat-index',
+    str: 'js-index',
     from: 'index.other'
 }
             
