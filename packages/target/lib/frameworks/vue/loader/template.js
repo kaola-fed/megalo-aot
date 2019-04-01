@@ -118,7 +118,7 @@ module.exports = function ( source ) {
       callback( null, code + `\nexport { render, staticRenderFns }` )
     } )
     .catch( e => {
-      loaderContext.emitError( e )
+      deferred.del()
       callback( e, source )
     } )
 }

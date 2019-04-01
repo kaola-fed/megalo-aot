@@ -84,11 +84,11 @@ function modifyResolveOption ( compiler, options ) {
   // add to webpack resolve.plugins in order to resolve multi-platform js module
   !compiler.options.resolve.plugins && (compiler.options.resolve.plugins = []);
   compiler.options.resolve.plugins.push(new MultiPlatformResolver(platform));
-  
+
   // require multi-platform module like a directory
   const mainFiles = ['index', `index.${platform}`, 'index.default'];
   const extensions = ['.vue', '.js', '.json'];
-  
+
   compiler.options.resolve.mainFiles = getConcatedArray(compiler.options.resolve.mainFiles, mainFiles);
   compiler.options.resolve.extensions = getConcatedArray(compiler.options.resolve.extensions, extensions);
 
@@ -289,10 +289,17 @@ function normalizePages( { pages, assets, subpackages, entrypoints, platform } )
     const newPage = Object.assign( {}, page, { files } )
 
     // subpackage should prefix root
-    if ( subpackage ) {
-      page.entryComponent.root = subpackage.root
+    if ( page.entryComponent ) {
+      if ( subpackage ) {
+        page.entryComponent.root = subpackage.root
+      } else {
+        page.entryComponent.root = ''
+      }
     } else {
-      page.entryComponent.root = ''
+      newPage.entryComponent = {
+        root: ''
+      }
+      // throw new Error( `Cannot parse entry component for "${ page.file }"` )
     }
 
     normalized.push( newPage )

@@ -15,7 +15,13 @@ module.exports = function( source, extractComponentsPlugin, loaderContext ) {
     ]
   }
 
-  const { metadata } = babel.transform( source, babelOptions )
+  let metadata
+
+  try {
+    metadata = babel.transform( source, babelOptions ).metadata
+  } catch ( e ) {
+    return Promise.reject( e )
+  }
 
   const components = ( metadata && metadata.megaloComponents ) || {}
 
