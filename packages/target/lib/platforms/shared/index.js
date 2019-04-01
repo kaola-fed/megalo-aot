@@ -354,11 +354,13 @@ function genSlotsGeneratorArgs( {
 
 function normalizeGeneratorOptions( options, { constants, extensions } ) {
   const entryComponent = options.entryComponent || {}
+  const root = entryComponent.root || ''
+  const name = entryComponent.name || ''
 
   // resolve entryComponent src
   entryComponent.src = constants.COMPONENT_OUTPUT_PATH
-    .replace( /\[root\]/g, entryComponent.root ? entryComponent.root + '/' : '' )
-    .replace( /\[name\]/g, entryComponent.name ) +
+    .replace( /\[root\]/g, root ? root + '/' : '' )
+    .replace( /\[name\]/g, name ) +
     extensions.template
 
   return options

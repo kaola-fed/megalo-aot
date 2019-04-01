@@ -24,7 +24,16 @@ module.exports = function ( source ) {
       ]
     }
 
-    const { code, map, metadata } = babel.transform( source, babelOptions )
+    let code, map, metadata
+
+    try {
+      const result = babel.transform( source, babelOptions )
+      code = result.code
+      map = result.map
+      metadata = result.metadata
+    } catch ( e ) {
+      callback( e )
+    }
 
     source = code
     sourcemap = map
