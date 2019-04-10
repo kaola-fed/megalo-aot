@@ -15,6 +15,8 @@ const deferred = require( '../utils/deferred' )
 const platforms = require( '../platforms' )
 const chalk = require('chalk')
 const MultiPlatformResolver = require( './MultiPlatformResolver' )
+const attachMultiPlatformModule = require( '../frameworks/vue/utils/attachMultiPlatformModule.js' )
+const generateWebFiles = require( '../utils/generateWebFiles' )
 
 const pages = {}
 const allCompilerOptions = {}
@@ -31,6 +33,7 @@ class MegaloPlugin {
     const { rules } = new RuleSet( rawRules )
     const megaloOptions = this.options
     const megaloTemplateCompiler = megaloOptions.compiler
+    const isWeb = megaloOptions.platform == 'web'
 
     // replace globalObject
     replaceGlobalObject( compiler, megaloOptions )
@@ -39,7 +42,7 @@ class MegaloPlugin {
     modifyResolveOption(compiler, megaloOptions);
 
     // generate pages
-    hookJSEntry( {
+    !isWeb && hookJSEntry( {
       rules,
       files: [ 'foo.js', 'foo.ts' ],
       entryLoader: {
@@ -56,15 +59,18 @@ class MegaloPlugin {
     } )
 
     // hook url-loader/file-loader
-    hookAssets( {
+    !isWeb && hookAssets( {
       rules,
       files: [ 'foo.jpg', 'foo.jpeg', 'foo.png', 'foo.gif' ],
     } )
 
-    hookAssets( {
+    !isWeb && hookAssets( {
       rules,
       files: [ 'foo.ttf', 'foo.eot', 'foo.woff', 'foo.woff2', 'foo.svg' ],
     } )
+
+    // modify vue-loader options in order to support multi-platform template
+    isWeb && modifyVueLoaderOptions( rules, megaloOptions.platform );
 
     // attach to loaderContext
     attachEntryHelper( compiler )
@@ -72,7 +78,10 @@ class MegaloPlugin {
     attachDeferredAPI( compiler )
 
     // lazy emit files using `pages` && `allCompilerOptions` && `templates`
-    lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
+    !isWeb && lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
+
+    // generate web files
+    isWeb && addWebBundleHooks(compiler)
 
     compiler.options.module.rules = rules
   }
@@ -84,11 +93,11 @@ function modifyResolveOption ( compiler, options ) {
   // add to webpack resolve.plugins in order to resolve multi-platform js module
   !compiler.options.resolve.plugins && (compiler.options.resolve.plugins = []);
   compiler.options.resolve.plugins.push(new MultiPlatformResolver(platform));
-
+  
   // require multi-platform module like a directory
   const mainFiles = ['index', `index.${platform}`, 'index.default'];
   const extensions = ['.vue', '.js', '.json'];
-
+  
   compiler.options.resolve.mainFiles = getConcatedArray(compiler.options.resolve.mainFiles, mainFiles);
   compiler.options.resolve.extensions = getConcatedArray(compiler.options.resolve.extensions, extensions);
 
@@ -194,6 +203,8 @@ function fixAssetPaths( { assets, subpackages } ) {
 function replaceGlobalObject( compiler, megaloOptions ) {
   if (megaloOptions.platform === 'alipay') {
     compiler.options.output.globalObject = 'my'
+  } else if (megaloOptions.platform == 'web') {
+    compiler.options.output.globalObject = 'window'
   } else {
     compiler.options.output.globalObject = 'global'
   }
@@ -215,6 +226,23 @@ function hookJSEntry( { rules, files = [], entryLoader } ) {
   entryUse.splice( babelUseLoaderIndex + 1, 0, entryLoader )
 }
 
+function modifyVueLoaderOptions (rules, target) {
+  const vueLoaderRule = findRuleByFile(rules, ['foo.vue', 'foo.vue.html']);
+  const vueLoader = vueLoaderRule.use.find((rule) => {
+    return rule.loader == 'vue-loader';
+  });
+
+  if (!vueLoader) {
+    return;
+  }
+
+  !vueLoader.options && (vueLoader.options = {});
+  !vueLoader.options.compilerOptions && (vueLoader.options.compilerOptions = {});
+  vueLoader.options.compilerOptions.target = target;
+
+  attachMultiPlatformModule(vueLoader.options.compilerOptions);
+}
+
 function hookCss( { rules, files = [], loader } ) {
   const entryRule = findRuleByFile( rules, files )
 
@@ -223,6 +251,21 @@ function hookCss( { rules, files = [], loader } ) {
   }
 
   entryRule.use.unshift( loader )
+}
+
+function addWebBundleHooks (compiler) {
+  compiler.hooks.normalModuleFactory.tap('megalo-plugin-web-entry-file', () => {
+    generateWebFiles(compiler);
+  })
+
+  // TODO: add a configuration in megalo.config.js 
+  const rootDir = path.join(process.cwd(), './src')
+
+  // add app file so that route file regenerate when config changes
+  compiler.hooks.afterCompile.tapAsync('megalo-plugin-add-dependencies', (compilation, cb) => {
+    compilation.fileDependencies.add(path.join(rootDir, 'app.js'), path.join(rootDir, 'App.vue'));
+    cb()
+  })
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
@@ -289,17 +332,10 @@ function normalizePages( { pages, assets, subpackages, entrypoints, platform } )
     const newPage = Object.assign( {}, page, { files } )
 
     // subpackage should prefix root
-    if ( page.entryComponent ) {
-      if ( subpackage ) {
-        page.entryComponent.root = subpackage.root
-      } else {
-        page.entryComponent.root = ''
-      }
+    if ( subpackage ) {
+      page.entryComponent.root = subpackage.root
     } else {
-      newPage.entryComponent = {
-        root: ''
-      }
-      // throw new Error( `Cannot parse entry component for "${ page.file }"` )
+      page.entryComponent.root = ''
     }
 
     normalized.push( newPage )
