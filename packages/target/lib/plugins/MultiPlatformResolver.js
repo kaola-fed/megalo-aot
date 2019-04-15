@@ -20,14 +20,13 @@ class MultiPlatformResolver {
      
                 // looking for file according to the following order:
                 //
-                // 1. index.js
-                // 2. file for current platform index.${platform}.js
-                // 3. index.default.js
+                // 1. file for current platform index.${platform}.js
+                // 2. index.js
                 //
                 // otherwise throws an error
 
                 if (fileNameExp.test(requestPath)) {
-                    let attempts = ['index.default.js', `index.${platform}.js`, 'index.js'];
+                    let attempts = ['index.js', `index.${platform}.js`];
 
                     attempts = attempts.map(function (item) {
                         return requestPath.replace(fileNameExp, function (match, p1, p2) {

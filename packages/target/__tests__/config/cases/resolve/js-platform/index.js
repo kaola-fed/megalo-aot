@@ -1,6 +1,6 @@
 
 module.exports = {
-    str: 'js-index',
+    str: 'js-platform',
     from: 'index'
 }
             

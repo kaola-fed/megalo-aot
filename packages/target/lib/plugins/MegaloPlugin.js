@@ -2,6 +2,7 @@ const path = require( 'path' )
 const qs = require( 'querystring' )
 const RuleSet = require( 'webpack/lib/RuleSet' )
 const findRuleByFile = require( '../utils/findRuleByFile' )
+const findAllRulesByFile = require( '../utils/findAllRulesByFile' )
 const findRuleByQuery = require( '../utils/findRuleByQuery' )
 const createEntryHelper = require( '../utils/createEntryHelper' )
 const attach = require( '../utils/attachLoaderContext' )
@@ -54,7 +55,7 @@ class MegaloPlugin {
     // use to support multi-platform style in vue component
     hookCss( {
       rules,
-      files: [ 'foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus', 'foo.mcss' ],
+      files: getStyleRulesWithVueLoaderRules([ 'foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus', 'foo.mcss' ]),
       loader: require.resolve( '../loaders/multi-platform-style' ),
     } )
 
@@ -87,6 +88,18 @@ class MegaloPlugin {
   }
 }
 
+function getStyleRulesWithVueLoaderRules (arr) {
+  let newArr = [];
+
+  arr.forEach((item) => {
+    let lang = item.split(".")[1];
+
+    newArr.push(item, `foo.vue?vue&type=style&lang=${lang}&`);
+  });
+
+  return newArr;
+}
+
 function modifyResolveOption ( compiler, options ) {
   const { platform = 'wechat' } = options;
 
@@ -95,7 +108,7 @@ function modifyResolveOption ( compiler, options ) {
   compiler.options.resolve.plugins.push(new MultiPlatformResolver(platform));
   
   // require multi-platform module like a directory
-  const mainFiles = ['index', `index.${platform}`, 'index.default'];
+  const mainFiles = [`index.${platform}`, 'index'];
   const extensions = ['.vue', '.js', '.json'];
   
   compiler.options.resolve.mainFiles = getConcatedArray(compiler.options.resolve.mainFiles, mainFiles);
@@ -243,14 +256,16 @@ function modifyVueLoaderOptions (rules, target) {
   attachMultiPlatformModule(vueLoader.options.compilerOptions);
 }
 
-function hookCss( { rules, files = [], loader } ) {
-  const entryRule = findRuleByFile( rules, files )
+function hookCss({ rules, files = [], loader }) {
+  const entryRuleArr = findAllRulesByFile(rules, files), vueIndex = findAllRulesByFile(rules, ['foo.vue', 'foo.vue.html'])[0] || -1;
 
-  if ( !entryRule ) {
+  if ( !entryRuleArr.length ) {
     return
   }
-
-  entryRule.use.unshift( loader )
+  // add loader to loaders which also enclude loaders cloned by vue-loader-plugin while vue-loader itself should not be applied this change 
+  entryRuleArr.forEach((index) => {
+    index != vueIndex && rules[index].use.unshift( loader )
+  });
 }
 
 function addWebBundleHooks (compiler) {

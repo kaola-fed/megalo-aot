@@ -1,7 +1,5 @@
 module.exports = {
-    indexFirst () {
-        wx.navigateTo({url: '/pages/index'})
-
+    init () {
         return 'wechat';
     }
 }
