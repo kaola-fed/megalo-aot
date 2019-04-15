@@ -347,10 +347,17 @@ function normalizePages( { pages, assets, subpackages, entrypoints, platform } )
     const newPage = Object.assign( {}, page, { files } )
 
     // subpackage should prefix root
-    if ( subpackage ) {
-      page.entryComponent.root = subpackage.root
+    if ( page.entryComponent ) {
+      if ( subpackage ) {
+        page.entryComponent.root = subpackage.root
+      } else {
+        page.entryComponent.root = ''
+      }
     } else {
-      page.entryComponent.root = ''
+      newPage.entryComponent = {
+        root: ''
+      }
+      // throw new Error( `Cannot parse entry component for "${ page.file }"` )
     }
 
     normalized.push( newPage )
