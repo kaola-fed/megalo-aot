@@ -1,7 +1,5 @@
 module.exports = {
-    indexFirst () {
-        my.navigateTo({url: '/pages/index'})
-
+    init () {
         return 'alipay';
     }
 }

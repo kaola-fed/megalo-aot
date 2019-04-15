@@ -1,6 +1,6 @@
 
 module.exports = {
-    str: 'wechat-error',
+    str: 'js-error',
     from: 'index.other'
 }
             

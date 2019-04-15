@@ -22,20 +22,14 @@ test.serial('resolve api in js file', async t => {
     });
 })
 
-test.serial('return index first', async t => {
+test.serial('return index without platform', async t => {
     let result = await compile(baseConfig, 'demoApiReturnIndex.js');
 
     t.snapshot(result.js);
 })
 
-test.serial('return platform without index', async t => {
+test.serial('return platform first', async t => {
     let result = await compile(baseConfig, 'demoApiReturnCurrentPlatform.js');
-
-    t.snapshot(result.js);
-})
-
-test.serial('return default without index and platform', async t => {
-    let result = await compile(baseConfig, 'demoApiReturnDefault.js');
 
     t.snapshot(result.js);
 })

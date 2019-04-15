@@ -1,21 +1,21 @@
-// modify this file together with findAllRulesByFile.js as it is copied from this one
+/* 
+  copied from findRuleByFile.js
+  return all rules matched rather than the first one
+ */
 const RuleSet = require( 'webpack/lib/RuleSet' )
 
 module.exports = function findRuleIndexByFile( rules, fakes ) {
-  let index
+  let arr = [];
 
-  fakes.some( fake => {
+  fakes.forEach( fake => {
     const ruleIndex = rules.findIndex( createMatcher( fake ) )
-
+    
     if ( ~ruleIndex ) {
-      index = ruleIndex
-      return true
+      arr.push(ruleIndex);
     }
-
-    return false
   } )
 
-  return rules[ index ]
+  return [...new Set(arr)];
 }
 
 function createMatcher ( fake ) {

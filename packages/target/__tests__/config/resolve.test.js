@@ -29,3 +29,23 @@ test.serial('resolve js file', async t => {
         t.fail();
     });
 })
+
+test.serial('fail when file not found', async t => {
+    await compile(baseConfig, 'resolveCssInJsError.js').then(() => {
+        t.fail();
+    }).catch(() => {
+        t.pass();
+    });
+
+    await compile(baseConfig, 'resolveCssInVueError.vue').then(() => {
+        t.fail();
+    }).catch(() => {
+        t.pass();
+    });
+
+    await compile(baseConfig, 'resolveJsError.js').then(() => {
+        t.fail();
+    }).catch(() => {
+        t.pass();
+    });
+})
