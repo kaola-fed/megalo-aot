@@ -8,6 +8,8 @@ const path = require('path');
 const fs = require('fs')
 const extractConfigPlugin = require('../babel-plugins/extract-config');
 const { babel } = require('./babel')
+const parseConfig = require('./parseConfig')
+const getBlockContent = require('./getBlockContent');
 
 function getPageConfig({
     jsEntry = 'src/app.js',
@@ -37,7 +39,6 @@ function getPageConfig({
         return config || {};
     }
 
-    const getBlockContent = require('./getBlockContent');
     const content = fs.readFileSync(vueFile, { encoding: 'utf8' });
     let blocks = getBlockContent(content, 'config')
 
