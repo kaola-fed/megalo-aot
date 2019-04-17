@@ -18,7 +18,7 @@ module.exports = function (compiler) {
     const config =  getAppConfig()
     const pageEntry = [], subPackageEntry = [];
 
-    config.pages.forEach((page) => {
+    config.pages && config.pages.forEach((page) => {
         pageEntry.push({
             page,
             component: getComponentPath(page)
@@ -32,9 +32,11 @@ module.exports = function (compiler) {
         // }
         if (page && typeof page == 'object') {
             page.pages.forEach((item) => {
+                let pagePath = path.join(page.root, item);
+
                 subPackageEntry.push({
-                    page: path.join(page.root + item),
-                    component: getComponentPath(page.root + item)
+                    page: pagePath,
+                    component: getComponentPath(pagePath)
                 });
             })
         } else {
