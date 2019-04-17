@@ -23,17 +23,24 @@ declare type SFCBlock = {
     module?: string | boolean;
 }; */
 
+/**
+ * get the specified block content from the given vue file source
+ *
+ * @param {string} source
+ * @param {string} blockType
+ * @returns {SFCBlock[]}
+ */
 function getBlockContent (source, blockType) {
     try {
         const descriptor = compiler.parseComponent(source), block = null;
-        const originType = ['template', 'script', 'styles'];
+        const types = ['template', 'script'];
         
-        if (originType.indexOf(blockType) != -1) {
-            return descriptor[blockType];
+        if (types.indexOf(blockType) != -1) {
+            return [descriptor[blockType]];
         }
 
-        if (blockType == 'style') {
-            return descriptor.styles
+        if (blockType == 'style' || blockType == 'styles') {
+            return descriptor.styles;
         }
 
         let customBlocks = descriptor.customBlocks;

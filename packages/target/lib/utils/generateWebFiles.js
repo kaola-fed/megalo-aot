@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const getAppConfig = require('./getAppConfig');
+const getPageConfig = require('./getPageConfig');
 const { babel } = require('./babel');
 const entryComponentPlugin = require('../babel-plugins/entry-component');
 const isEqual = require('lodash.isequal');
@@ -9,13 +9,13 @@ const root = path.join(process.cwd(), 'src');
 
 // 1. if the page is a vue file, use it directly in route
 // 2. if the page is a js/ts file, find the component location then use the component in route
-module.exports = function (compiler) {
+module.exports = function (compiler, megaloOptions) {
     let countObj = {
         pageCount: 0,
         subPackageCount: 0
     }
 
-    const config =  getAppConfig()
+    const config = getPageConfig(megaloOptions.projectOptions && megaloOptions.projectOptions.appEntry || {})
     const pageEntry = [], subPackageEntry = [];
 
     config.pages && config.pages.forEach((page) => {

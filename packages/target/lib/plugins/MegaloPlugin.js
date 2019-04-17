@@ -82,7 +82,7 @@ class MegaloPlugin {
     !isWeb && lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
 
     // generate web files
-    isWeb && addWebBundleHooks(compiler)
+    isWeb && addWebBundleHooks(compiler, megaloOptions)
 
     compiler.options.module.rules = rules
   }
@@ -268,9 +268,9 @@ function hookCss({ rules, files = [], loader }) {
   });
 }
 
-function addWebBundleHooks (compiler) {
+function addWebBundleHooks (compiler, megaloOptions) {
   compiler.hooks.normalModuleFactory.tap('megalo-plugin-web-entry-file', () => {
-    generateWebFiles(compiler);
+    generateWebFiles(compiler, megaloOptions);
   })
 
   // TODO: add a configuration in megalo.config.js 

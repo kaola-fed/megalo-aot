@@ -1,14 +1,21 @@
-// 1. search app.js for config
-// 2. search App.js for config
+// get the input jsEntry an vueEntry then
+// 1. search the js entry for config
+// 2. search the vue entry for config
+// 
+// no input config will search app.js and App.vue for app config
+
 const path = require('path');
 const fs = require('fs')
 const extractConfigPlugin = require('../babel-plugins/extract-config');
 const { babel } = require('./babel')
 
-function getAppConfig() {
+function getPageConfig({
+    jsEntry = 'src/app.js',
+    vueEntry = 'src/App.vue'
+}) {
     const root = process.cwd();
-    const jsFile = path.join(root, 'src/app.js');
-    const vueFile = path.join(root, 'src/App.vue');
+    const jsFile = path.join(root, jsEntry);
+    const vueFile = path.join(root, vueEntry);
     let config = null
 
     if (fs.existsSync(jsFile)) {
@@ -41,4 +48,4 @@ function getAppConfig() {
     return parseConfig({ source: blocks[0].content, lang: blocks[0].lang || 'json', filepath: vueFile });
 }
 
-module.exports = getAppConfig;
+module.exports = getPageConfig;
