@@ -9,13 +9,13 @@ const root = path.join(process.cwd(), 'src');
 
 // 1. if the page is a vue file, use it directly in route
 // 2. if the page is a js/ts file, find the component location then use the component in route
-module.exports = function (compiler, megaloOptions) {
+module.exports = function (compiler, appEntry) {
     let countObj = {
         pageCount: 0,
         subPackageCount: 0
     }
 
-    const config = getPageConfig(megaloOptions.projectOptions && megaloOptions.projectOptions.appEntry || {})
+    const config = getPageConfig(appEntry)
     const pageEntry = [], subPackageEntry = [];
 
     config.pages && config.pages.forEach((page) => {
@@ -47,7 +47,7 @@ module.exports = function (compiler, megaloOptions) {
         }
     });
 
-    const outputPrefix = path.join(process.cwd(), 'dist-web');
+    const outputPrefix = path.join(process.cwd(), '.megalo-tmp');
 
     !fs.existsSync(outputPrefix) && fs.mkdirSync(outputPrefix, { recursive: true });
     

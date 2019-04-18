@@ -1,4 +1,5 @@
 const path = require( 'path' )
+const fs = require( 'fs' )
 const qs = require( 'querystring' )
 const RuleSet = require( 'webpack/lib/RuleSet' )
 const findRuleByFile = require( '../utils/findRuleByFile' )
@@ -82,7 +83,7 @@ class MegaloPlugin {
     !isWeb && lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
 
     // generate web files
-    isWeb && addWebBundleHooks(compiler, megaloOptions)
+    isWeb && addWebBundleHooks(compiler, megaloOptions.projectOptions || {})
 
     compiler.options.module.rules = rules
   }
@@ -268,17 +269,28 @@ function hookCss({ rules, files = [], loader }) {
   });
 }
 
-function addWebBundleHooks (compiler, megaloOptions) {
-  compiler.hooks.normalModuleFactory.tap('megalo-plugin-web-entry-file', () => {
-    generateWebFiles(compiler, megaloOptions);
-  })
+function addWebBundleHooks (compiler, projectOptions) {
+  const rootDir = process.cwd();
+  const defaultEntry = {
+    jsEntry: 'src/app.js',
+    vueEntry: 'src/App.vue'
+  };
+  const appEntry = projectOptions.appEntry || {};
 
-  // TODO: add a configuration in megalo.config.js 
-  const rootDir = path.join(process.cwd(), './src')
+  appEntry = Object.assign({}, defaultEntry, appEntry);
+
+  compiler.hooks.normalModuleFactory.tap('megalo-plugin-web-entry-file', () => {
+    generateWebFiles(compiler, appEntry);
+  })
 
   // add app file so that route file regenerate when config changes
   compiler.hooks.afterCompile.tapAsync('megalo-plugin-add-dependencies', (compilation, cb) => {
-    compilation.fileDependencies.add(path.join(rootDir, 'app.js'), path.join(rootDir, 'App.vue'));
+    let jsEntry = path.join(rootDir, appEntry.jsEntry),
+        vueEntry = path.join(rootDir, appEntry.vueEntry);
+
+    fs.existsSync(jsEntry) && compilation.fileDependencies.add(jsEntry);
+    fs.existsSync(vueEntry) && compilation.fileDependencies.add(vueEntry);
+
     cb()
   })
 }

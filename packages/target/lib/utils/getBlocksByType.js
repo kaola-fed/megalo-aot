@@ -30,27 +30,23 @@ declare type SFCBlock = {
  * @param {string} blockType
  * @returns {SFCBlock[]}
  */
-function getBlockContent (source, blockType) {
-    try {
-        const descriptor = compiler.parseComponent(source), block = null;
-        const types = ['template', 'script'];
-        
-        if (types.indexOf(blockType) != -1) {
-            return [descriptor[blockType]];
-        }
-
-        if (blockType == 'style' || blockType == 'styles') {
-            return descriptor.styles;
-        }
-
-        let customBlocks = descriptor.customBlocks;
-     
-        return customBlocks.filter((block) => {
-            return block.type == blockType;
-        });
-    } catch (e) {
-        throw e;
+function getBlocksByType (source, blockType) {
+    const descriptor = compiler.parseComponent(source), block = null;
+    const types = ['template', 'script'];
+    
+    if (types.indexOf(blockType) != -1) {
+        return [descriptor[blockType]];
     }
+
+    if (blockType == 'style' || blockType == 'styles') {
+        return descriptor.styles;
+    }
+
+    let customBlocks = descriptor.customBlocks;
+    
+    return customBlocks.filter((block) => {
+        return block.type === blockType;
+    });
 }
 
-module.exports = getBlockContent;
+module.exports = getBlocksByType;
