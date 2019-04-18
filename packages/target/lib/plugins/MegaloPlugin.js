@@ -275,7 +275,7 @@ function addWebBundleHooks (compiler, projectOptions) {
     jsEntry: 'src/app.js',
     vueEntry: 'src/App.vue'
   };
-  const appEntry = projectOptions.appEntry || {};
+  let appEntry = projectOptions.appEntry || {};
 
   appEntry = Object.assign({}, defaultEntry, appEntry);
 
