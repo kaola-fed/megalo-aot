@@ -120,7 +120,7 @@ function modifyResolveOption ( compiler, options ) {
   // add some config for web
   if (options.platform == "web") {
     compiler.options.resolve.mainFields = ["browser", "module", "main"];
-    compiler.options.resove.aliasFields = ["browser"];
+    compiler.options.resolve.aliasFields = ["browser"];
   }
 }
 
