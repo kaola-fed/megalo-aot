@@ -116,6 +116,12 @@ function modifyResolveOption ( compiler, options ) {
   compiler.options.resolve.extensions = getConcatedArray(compiler.options.resolve.extensions, extensions);
 
   compiler.options.resolve.mainFiles.length > mainFiles.length && console.log(chalk.yellow('warning') + " megalo modified your webpack config " + chalk.bgBlue("resolve.mainFiles") + ", contact us if any problem occurred");
+
+  // add some config for web
+  if (options.platform == "web") {
+    compiler.options.resolve.mainFields = ["browser", "module", "main"];
+    compiler.options.resove.aliasFields = ["browser"];
+  }
 }
 
 function getConcatedArray (source, target) {
