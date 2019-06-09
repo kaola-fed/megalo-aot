@@ -2,6 +2,7 @@ const path = require( 'path' )
 const qs = require( 'querystring' )
 const RuleSet = require( 'webpack/lib/RuleSet' )
 const findRuleByFile = require( '../utils/findRuleByFile' )
+const findAllRulesByFile = require( '../utils/findAllRulesByFile' )
 const findRuleByQuery = require( '../utils/findRuleByQuery' )
 const createEntryHelper = require( '../utils/createEntryHelper' )
 const attach = require( '../utils/attachLoaderContext' )
@@ -11,7 +12,10 @@ const subpackagesUtil = require( '../utils/subpackages' )
 const walkObject = require( '../utils/walkObject' )
 const replacer = require( '../utils/replacer' )
 const toAsset = require( '../utils/toAsset' )
+const deferred = require( '../utils/deferred' )
 const platforms = require( '../platforms' )
+const chalk = require('chalk')
+const MultiPlatformResolver = require( './MultiPlatformResolver' )
 
 const pages = {}
 const allCompilerOptions = {}
@@ -32,6 +36,9 @@ class MegaloPlugin {
     // replace globalObject
     replaceGlobalObject( compiler, megaloOptions )
 
+    // modify the resolve options
+    modifyResolveOption(compiler, megaloOptions);
+
     // generate pages
     hookJSEntry( {
       rules,
@@ -40,6 +47,13 @@ class MegaloPlugin {
         options: {},
         loader: require.resolve( '../loaders/js-entry' ),
       },
+    } )
+
+    // use to support multi-platform style in vue component
+    hookCss( {
+      rules,
+      files: getStyleRulesWithVueLoaderRules([ 'foo.css', 'foo.scss', 'foo.sass', 'foo.less', 'foo.styl', 'foo.stylus', 'foo.mcss' ]),
+      loader: require.resolve( '../loaders/multi-platform-style' ),
     } )
 
     // hook url-loader/file-loader
@@ -56,12 +70,50 @@ class MegaloPlugin {
     // attach to loaderContext
     attachEntryHelper( compiler )
     attachCacheAPI( compiler )
+    attachDeferredAPI( compiler )
 
     // lazy emit files using `pages` && `allCompilerOptions` && `templates`
     lazyEmit( compiler, megaloTemplateCompiler, megaloOptions )
 
     compiler.options.module.rules = rules
   }
+}
+
+function getStyleRulesWithVueLoaderRules (arr) {
+  let newArr = [];
+
+  arr.forEach((item) => {
+    let lang = item.split(".")[1];
+
+    newArr.push(item, `foo.vue?vue&type=style&lang=${lang}&`);
+  });
+
+  return newArr;
+}
+
+function modifyResolveOption ( compiler, options ) {
+  const { platform = 'wechat' } = options;
+
+  // add to webpack resolve.plugins in order to resolve multi-platform js module
+  !compiler.options.resolve.plugins && (compiler.options.resolve.plugins = []);
+  compiler.options.resolve.plugins.push(new MultiPlatformResolver(platform));
+
+  // require multi-platform module like a directory
+  const mainFiles = [`index.${platform}`, 'index'];
+  const extensions = ['.vue', '.js', '.json'];
+
+  compiler.options.resolve.mainFiles = getConcatedArray(compiler.options.resolve.mainFiles, mainFiles);
+  compiler.options.resolve.extensions = getConcatedArray(compiler.options.resolve.extensions, extensions);
+
+  compiler.options.resolve.mainFiles.length > mainFiles.length && console.log(chalk.yellow('warning') + " megalo modified your webpack config " + chalk.bgBlue("resolve.mainFiles") + ", contact us if any problem occurred");
+}
+
+function getConcatedArray (source, target) {
+  if (!source) {
+    return target;
+  }
+
+  return [...new Set(source.concat(target))]
 }
 
 function hookAssets( { rules, files } ) {
@@ -161,7 +213,7 @@ function replaceGlobalObject( compiler, megaloOptions ) {
 }
 
 // [framework]-loader clones babel-loader rule, we shall ignore it
-function hookJSEntry( { rules, files = {}, entryLoader } ) {
+function hookJSEntry( { rules, files = [], entryLoader } ) {
   const entryRule = findRuleByFile( rules, files )
 
   if ( !entryRule ) {
@@ -174,6 +226,18 @@ function hookJSEntry( { rules, files = {}, entryLoader } ) {
   } )
 
   entryUse.splice( babelUseLoaderIndex + 1, 0, entryLoader )
+}
+
+function hookCss({ rules, files = [], loader }) {
+  const entryRuleArr = findAllRulesByFile(rules, files), vueIndex = findAllRulesByFile(rules, ['foo.vue', 'foo.vue.html'])[0] || -1;
+
+  if ( !entryRuleArr.length ) {
+    return
+  }
+  // add loader to loaders which also enclude loaders cloned by vue-loader-plugin while vue-loader itself should not be applied this change 
+  entryRuleArr.forEach((index) => {
+    index != vueIndex && rules[index].use.unshift( loader )
+  });
 }
 
 function lazyEmit( compiler, megaloTemplateCompiler, megaloOptions ) {
@@ -240,10 +304,17 @@ function normalizePages( { pages, assets, subpackages, entrypoints, platform } )
     const newPage = Object.assign( {}, page, { files } )
 
     // subpackage should prefix root
-    if ( subpackage ) {
-      page.entryComponent.root = subpackage.root
+    if ( page.entryComponent ) {
+      if ( subpackage ) {
+        page.entryComponent.root = subpackage.root
+      } else {
+        page.entryComponent.root = ''
+      }
     } else {
-      page.entryComponent.root = ''
+      newPage.entryComponent = {
+        root: ''
+      }
+      // throw new Error( `Cannot parse entry component for "${ page.file }"` )
     }
 
     normalized.push( newPage )
@@ -296,6 +367,23 @@ function attachCacheAPI( compiler ) {
     loaderContext.megaloCacheToPages = cacheToPages
     loaderContext.megaloCacheToAllCompilerOptions = cacheToAllCompilerOptions
     loaderContext.megaloCacheToTemplates = cacheToTemplates
+  } )
+}
+
+const _deferredCache = {}
+function attachDeferredAPI( compiler ) {
+  attach( 'megalo-plugin-deferred-api', compiler, loaderContext => {
+    loaderContext.megaloDeferred = function ( key ) {
+      if ( !_deferredCache[ key ] ) {
+        _deferredCache[ key ] = deferred()
+
+        _deferredCache[ key ].del = function () {
+          delete _deferredCache[ key ]
+        }
+      }
+
+      return _deferredCache[ key ]
+    }
   } )
 }
 

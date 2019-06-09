@@ -18,7 +18,7 @@ function findSubpackage( filepath, subpackages ) {
     const pages = pkg.pages || []
     const fullpaths = pages.map( page => {
       // TODO: pkg.root + '/' is not the best way to detect
-      return pkg.root + '/'
+      return '/' + pkg.root + '/'
     } ).filter( Boolean )
 
     if ( fullpaths.length === 0 ) {
@@ -27,9 +27,7 @@ function findSubpackage( filepath, subpackages ) {
 
     const inSubpackage = new RegExp( fullpaths.join( '|' ) )
 
-    if ( inSubpackage.test( filepath ) ) {
-      return true
-    }
+    return inSubpackage.test( '/' + filepath )
   } )
 
   _caches[ cacheKey ] = found

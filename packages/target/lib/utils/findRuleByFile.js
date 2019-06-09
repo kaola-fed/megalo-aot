@@ -1,3 +1,4 @@
+// modify this file together with findAllRulesByFile.js as it is copied from this one
 const RuleSet = require( 'webpack/lib/RuleSet' )
 
 module.exports = function findRuleIndexByFile( rules, fakes ) {

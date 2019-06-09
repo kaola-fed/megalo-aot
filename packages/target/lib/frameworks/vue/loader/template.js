@@ -9,14 +9,12 @@ const extractCompilerOptionsFromScriptSource =
 const extractPageFromScriptSource =
   require( '../../shared/utils/extractPageFromScriptSource' )
 const extractComponentsPlugin = require( '../babel-plugins/extract-components' )
+const attachMultiPlatformModule = require('../utils/attachMultiPlatformModule')
 
 // Loader that compiles raw template into JavaScript functions.
 // This is injected by the global pitcher (../pitch) for template
 // selection requests initiated from vue files.
-module.exports = function ( data ) {
-  const source = data.template.content
-  const scriptSource = data.script.content
-
+module.exports = function ( source ) {
   const loaderContext = this
   const callback = loaderContext.async()
   const query = qs.parse(this.resourceQuery.slice(1))
@@ -50,13 +48,15 @@ module.exports = function ( data ) {
     md5
   })
 
-  const jobs = [
-    extractCompilerOptionsFromScriptSource( scriptSource, extractComponentsPlugin, loaderContext ),
-    extractPageFromScriptSource( scriptSource, loaderContext ),
-  ]
+  // add module to compiler option in order to handle <template platform="xxx">
+  attachMultiPlatformModule(compilerOptions);
 
-  Promise.all( jobs )
+  const deferred = loaderContext.megaloDeferred( realResourcePath )
+
+  deferred.promise
     .then( data => {
+      deferred.del()
+
       const [ cOptions, page ] = data || []
 
       validateImports( loaderContext, cOptions.imports )
@@ -118,7 +118,7 @@ module.exports = function ( data ) {
       callback( null, code + `\nexport { render, staticRenderFns }` )
     } )
     .catch( e => {
-      loaderContext.emitError( e )
+      deferred.del()
       callback( e, source )
     } )
 }

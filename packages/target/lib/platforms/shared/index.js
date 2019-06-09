@@ -26,7 +26,7 @@ module.exports = function( {
   ) {
     const { htmlParse = false, platform } = megaloOptions
 
-    let htmlParsePaths = {
+    const htmlParsePaths = {
       template: constants.HTMLPARSE_TEMPLATE_OUTPUT_PATH + extensions.template,
       style: constants.HTMLPARSE_STYLE_OUTPUT_PATH + extensions.style,
     }
@@ -85,6 +85,7 @@ module.exports = function( {
           body: generated.body || '',
           slots: generated.slots || [],
           needHtmlParse: !!generated.needHtmlParse,
+          children: generated.children,
         }
       }
 
@@ -96,47 +97,131 @@ module.exports = function( {
         body: cached.body,
         slots: cached.slots,
         needHtmlParse: cached.needHtmlParse,
+        children: cached.children,
       } )
     } )
 
-    const MAIN_COMPONENT_NAMES = components
-      .filter( c => !c.subpackage )
-      .map( c => c.name )
+    // default hoisted components
+    const HOISTED_COMPONENT_NAMES = new Set(
+      components
+        .filter( c => !c.subpackage )
+        .map( c => c.name )
+    )
 
-    const extracted = new Set()
     const mainSlots = new Set()
     const subpackageSlots = {}
 
-    components.forEach( function( component ) {
-      const { subpackage, slots } = component
-      const root = subpackage ? subpackage.root + '/' : ''
+    // Start: find hoisted components
+    components.forEach( component => attachParent( component.children ) )
 
-      if ( subpackage ) {
-        const shouldExtracted = slots.some( slot => {
-          return slot.dependencies
-            .some( dependency => !!~MAIN_COMPONENT_NAMES.indexOf( dependency ) )
+    function attachParent( children ) {
+      if ( Array.isArray( children ) ) {
+        walkChildren( children, null, ( child, parent ) => {
+          child.parent = parent
         } )
+      }
+    }
 
-        slots.forEach( slot => {
-          if ( shouldExtracted ) {
-            slot.dependencies.forEach( d => extracted.add( d ) )
-            mainSlots.add( slot )
-          } else {
-            subpackageSlots[ root ] = subpackageSlots[ root ] || new Set()
-            subpackageSlots[ root ].add( slot )
+    let ttl = 20
+    let dirty = false
+
+    function digest() {
+      dirty = false
+
+      components.forEach( component => {
+        const { children } = component
+
+        walkChildren( children, null, child => {
+          // not hoisted yet, start checking
+          if ( !isHoisted( child.name ) ) {
+            traverseUp( child, parent => {
+              if ( parent && isHoisted( parent.name ) ) {
+                hoist( child.name )
+                dirty = true
+                return false
+              }
+            } )
           }
         } )
-      } else {
-        slots.forEach( s => mainSlots.add( s ) )
+      } )
+
+      ttl--
+
+      if ( dirty && ttl > 0 ) {
+        digest()
       }
+    }
+
+    digest()
+
+    function isHoisted( name ) {
+      return HOISTED_COMPONENT_NAMES.has( name )
+    }
+
+    function hoist( name ) {
+      HOISTED_COMPONENT_NAMES.add( name )
+    }
+
+    function traverseUp( child, callback ) {
+      let target = child.parent
+      while ( target ) {
+        if ( callback( target ) === false ) {
+          break
+        }
+        target = target.parent
+      }
+    }
+
+    function walkChildren( children = [], parent, callback ) {
+      children.forEach( child => {
+        callback( child, parent )
+
+        if ( child.children ) {
+          walkChildren( child.children, child, callback )
+        }
+      } )
+    }
+    // END: find hoisted components
+
+    // Start: find hoisted slots
+    components.forEach( component => {
+      const { subpackage, children } = component
+
+      const root = subpackage ? subpackage.root + '/' : ''
+
+      walkChildren( children, null, child => {
+        const slots = child.slots || []
+        if ( isHoisted( child.name ) ) {
+          // add to main
+          slots.forEach( slot => mainSlots.add( slot ) )
+        } else {
+          let isParentHoisted = false
+          traverseUp( child, parent => {
+            if ( parent && isHoisted( parent.name ) ) {
+              isParentHoisted = true
+              return false
+            }
+          } )
+
+          if ( isParentHoisted ) {
+            // add to main
+            slots.forEach( slot => mainSlots.add( slot ) )
+          } else {
+            // add to subpackage
+            subpackageSlots[ root ] = subpackageSlots[ root ] || new Set()
+            slots.forEach( slot => subpackageSlots[ root ].add( slot ) )
+          }
+        }
+      } )
     } )
+    // End: find hoisted slots
 
     // prepare { name: { outPath, root } }
     const NAME_MAP = {}
     components.forEach( component => {
       const { name, subpackage } = component
 
-      const root = extracted.has( name ) ?
+      const root = isHoisted( name ) ?
         '' :
         ( subpackage ? subpackage.root + '/' : '' )
 
@@ -212,6 +297,8 @@ module.exports = function( {
         slots: mainSlots,
         constants,
         NAME_MAP,
+        htmlParsePaths,
+        htmlParse,
       } ) ),
       compilation
     )
@@ -228,6 +315,8 @@ module.exports = function( {
           root,
           constants,
           NAME_MAP,
+          htmlParsePaths,
+          htmlParse,
         } ) ),
         compilation
       )
@@ -236,7 +325,10 @@ module.exports = function( {
   }
 }
 
-function genSlotsGeneratorArgs( { slots, root = '', NAME_MAP, constants } ) {
+function genSlotsGeneratorArgs( {
+  slots, root = '', NAME_MAP, constants,
+  htmlParsePaths, htmlParse
+} ) {
   slots = Array.from( slots )
   const slotOutPath = constants.SLOTS_OUTPUT_PATH
     .replace( /\[root\]/g, root )
@@ -255,18 +347,20 @@ function genSlotsGeneratorArgs( { slots, root = '', NAME_MAP, constants } ) {
 
     return total
   }, {
-    imports: [],
+    imports: htmlParse ? [ pathPrefix + htmlParsePaths.template ] : [],
     bodies: []
   } )
 }
 
 function normalizeGeneratorOptions( options, { constants, extensions } ) {
   const entryComponent = options.entryComponent || {}
+  const root = entryComponent.root || ''
+  const name = entryComponent.name || ''
 
   // resolve entryComponent src
   entryComponent.src = constants.COMPONENT_OUTPUT_PATH
-    .replace( /\[root\]/g, entryComponent.root ? entryComponent.root + '/' : '' )
-    .replace( /\[name\]/g, entryComponent.name ) +
+    .replace( /\[root\]/g, root ? root + '/' : '' )
+    .replace( /\[name\]/g, name ) +
     extensions.template
 
   return options
