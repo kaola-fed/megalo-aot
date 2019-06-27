@@ -271,7 +271,9 @@ function hookCss({ rules, files = [], loader }) {
   }
   // add loader to loaders which also enclude loaders cloned by vue-loader-plugin while vue-loader itself should not be applied this change 
   entryRuleArr.forEach((index) => {
-    index != vueIndex && rules[index].use.unshift( loader )
+    if ( index != vueIndex ) {
+      rules[index].use ? rules[index].use.unshift( loader ) : rules[index].use = [ loader ]
+    }
   });
 }
 
