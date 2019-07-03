@@ -21,6 +21,11 @@ function createMegaloTarget( options = {} ) {
     new JsonpTemplatePlugin().apply( compiler )
     new LoaderTargetPlugin( 'mp-' + platform ).apply( compiler )
     new MegaloPlugin( options ).apply( compiler )
+
+    if (platform == 'web') {
+      return;
+    }
+
     FrameworkPlugins.forEach( Plugin => new Plugin( options ).apply( compiler ) )
 
     if ( !!htmlParse ) {
