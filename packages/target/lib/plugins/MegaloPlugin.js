@@ -45,7 +45,7 @@ class MegaloPlugin {
       files: [ 'foo.js', 'foo.ts' ],
       entryLoader: {
         options: {
-          babelPlugins: Object.prototype.toString.call(megaloOptions.entryBabelPlugins) === '[object Array]' ? megaloOptions.entryBabelPlugins : []
+          babelPlugins: Array.isArray( megaloOptions.jsEntryBabelPlugins ) ? megaloOptions.jsEntryBabelPlugins : []
         },
         loader: require.resolve( '../loaders/js-entry' ),
       },
