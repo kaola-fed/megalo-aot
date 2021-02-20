@@ -1,6 +1,6 @@
 {
   "name": "regular-mp-babel6",
-  "version": "0.0.2",
+  "version": "0.0.3-alpha.0",
   "description": "",
   "main": "index.js",
   "private": true,
@@ -12,9 +12,9 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@megalo/regular-loader": "^0.1.0",
+    "@megalo/regular-loader": "^0.1.1-alpha.0",
     "@megalo/regular-template-compiler": "^0.1.0",
-    "@megalo/target": "*",
+    "@megalo/target": "^0.7.4-alpha.0",
     "babel-core": "6",
     "babel-loader": "7.1",
     "babel-plugin-transform-object-rest-spread": "6.22.0",

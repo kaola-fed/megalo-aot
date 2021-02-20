@@ -1,6 +1,6 @@
 {
   "name": "@megalo/regular-template-compiler",
-  "version": "0.4.1",
+  "version": "0.4.2-alpha.0",
   "description": "",
   "publishConfig": {
     "access": "public"
@@ -16,12 +16,11 @@
   "license": "MIT",
   "dependencies": {
     "html-minifier": "^3.5.21",
+    "loader-utils": "^1.1.0",
     "lodash.clonedeep": "^4.5.0",
     "nanoid": "^1.0.2",
     "prettier": "^1.13.4",
     "regularjs": "^0.6.0",
-    "vue-template-compiler": "2.5.17",
-    "loader-utils": "^1.1.0"
-  },
-  "devDependencies": {}
+    "vue-template-compiler": "2.5.17"
+  }
 }

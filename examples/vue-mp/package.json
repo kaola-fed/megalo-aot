@@ -1,6 +1,6 @@
 {
   "name": "vue-mp",
-  "version": "0.1.0",
+  "version": "0.1.1-alpha.0",
   "description": "",
   "main": "index.js",
   "private": true,
@@ -15,7 +15,7 @@
   "devDependencies": {
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
-    "@megalo/target": "*",
+    "@megalo/target": "^0.7.4-alpha.0",
     "@megalo/template-compiler": "^0.7.7",
     "babel-loader": "8",
     "css-loader": "^1.0.0",
