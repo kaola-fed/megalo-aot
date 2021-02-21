@@ -1,4 +1,5 @@
 const path = require( 'path' )
+const loaderUtils = require( 'loader-utils' )
 const { babel } = require( '../utils/babel' )
 const extractConfigPlugin = require( '../babel-plugins/extract-config' )
 const entryComponentPlugin = require( '../babel-plugins/entry-component' )
@@ -8,6 +9,7 @@ const hashify = require( '../utils/hashify' )
 
 module.exports = function ( source ) {
   const loaderContext = this
+  const loaderOptions = loaderUtils.getOptions( loaderContext ) || {}
   const entryHelper = loaderContext.megaloEntryHelper
   const callback = loaderContext.async()
   let sourcemap = null
@@ -18,6 +20,7 @@ module.exports = function ( source ) {
     const babelOptions = {
       filename: loaderContext.resourcePath,
       plugins: [
+        ...loaderOptions.babelPlugins,
         extractConfigPlugin,
         entryComponentPlugin,
         mpTypePlugin( entryKey === 'app' ? 'app' : 'page' )
