@@ -32,7 +32,7 @@
     "json5": "^2.1.0",
     "loader-utils": "^1.1.0",
     "lodash.merge": "^4.6.1",
-    "postcss": "^7.0.2",
+    "postcss": "^8.2.10",
     "postcss-selector-parser": "^5.0.0-rc.3",
     "querystring": "^0.2.0",
     "semver": "^5.6.0"
